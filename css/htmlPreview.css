@@ -1,0 +1,327 @@
+/* ===== 【模块】cbyd21_HtmlPreview — HTML预览器样式 =====
+· 包含：模板入口 / 工具栏 / 编辑区 / 草稿区 / AI修改区 / 预览区
+· 页面整体走主项目的 app-scroll 滚动结构
+· 各区块按正常文档流往下排列
+*/
+
+/* HTML预览器整页滚动区
+· 这里复用主项目的 app-scroll
+· 整个页面上下滑动，不让内部区块互相抢高度
+*/
+.html-preview-page-scroll{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:16px;
+}
+
+/* 页面内容主容器
+· 所有区块按顺序往下排
+*/
+.html-preview-layout{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-height:min-content;
+}
+
+/* 顶部区域
+· 包含模板入口和工具按钮
+*/
+.html-preview-top{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  flex-shrink:0;
+}
+
+/* 示例模板入口区
+· 这里只保留结构容器
+· 实际按钮布局已经并入顶部统一工具栏
+*/
+.html-preview-template-bar{
+  display:block;
+}
+
+/* 工具按钮区
+· 顶部所有按钮统一用网格排版
+· 手机上更整齐，不会东一块西一块
+*/
+.html-preview-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.html-preview-toolbar-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+
+.html-preview-toolbar-grid .btn-sm{
+  width:100%;
+}
+
+.html-preview-toolbar-danger{
+  grid-column:1 / -1;
+}
+
+/* 各内容卡片
+· 保持正常块级排列
+*/
+.html-preview-editor-wrap,
+.html-preview-drafts-wrap,
+.html-preview-ai-wrap,
+.html-preview-result-wrap{
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  overflow:hidden;
+  flex-shrink:0;
+}
+
+/* 卡片标题栏 */
+.html-preview-section-title,
+.html-preview-result-header{
+  padding:10px 12px;
+  font-size:12px;
+  color:var(--text-secondary);
+  border-bottom:1px solid var(--border-soft);
+  background:var(--bg-secondary);
+}
+
+/* 预览区标题栏
+· 左边显示标题
+· 右边放缩放按钮
+*/
+.html-preview-result-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+/* 预览缩放按钮组 */
+.html-preview-zoom-actions{
+  display:flex;
+  gap:6px;
+  flex-shrink:0;
+}
+
+/* HTML编辑区
+· 保持可编辑
+· 但不让它一上来把整页撑坏
+*/
+.html-preview-textarea{
+  width:100%;
+  min-height:140px;
+  max-height:50vh;
+  padding:12px 14px;
+  background:var(--bg-input);
+  border:none;
+  outline:none;
+  color:var(--text-primary);
+  font-size:12px;
+  line-height:1.7;
+  font-family:'SF Mono','Fira Code',monospace;
+  resize:vertical;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* AI输入区
+· 高度比编辑区短一点
+*/
+.html-preview-ai-textarea{
+  width:100%;
+  min-height:96px;
+  max-height:30vh;
+  padding:12px 14px;
+  background:var(--bg-input);
+  border:none;
+  outline:none;
+  color:var(--text-primary);
+  font-size:12px;
+  line-height:1.7;
+  font-family:inherit;
+  resize:vertical;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* AI操作区
+· 手机上改成竖排，避免横向挤压
+*/
+.html-preview-ai-actions{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:10px;
+  padding:10px 12px;
+  border-top:1px solid var(--border-soft);
+  background:var(--bg-secondary);
+}
+
+.html-preview-ai-hint{
+  font-size:11px;
+  color:var(--text-muted);
+  line-height:1.5;
+}
+
+.html-preview-ai-actions .btn-sm{
+  width:100%;
+}
+
+/* 预览区
+· 不再试图撑满剩余空间
+· 整页自己滚动
+*/
+.html-preview-result-wrap{
+  min-height:240px;
+  display:flex;
+  flex-direction:column;
+}
+
+/* 预览外层包裹
+· 用来裁切缩放后的 iframe
+· 缩小时不会留下太奇怪的空白
+*/
+.html-preview-frame-wrap{
+  width:100%;
+  height:520px;
+  min-height:360px;
+  overflow:auto;
+  background:#ffffff;
+}
+
+/* 预览框
+· 实际缩放通过 JS 改 transform
+· transform-origin 固定在左上角，方便整体查看布局
+*/
+.html-preview-frame{
+  width:100%;
+  height:520px;
+  min-height:360px;
+  border:none;
+  background:#ffffff;
+  display:block;
+  transform-origin:top left;
+  transition:transform 0.18s ease;
+}
+
+/* 草稿区列表 */
+.html-preview-draft-list{
+  padding:10px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.html-preview-draft-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  background:var(--bg-secondary);
+  border:1px solid var(--border-soft);
+  border-radius:10px;
+}
+
+.html-preview-draft-info{
+  flex:1;
+  min-width:0;
+}
+
+.html-preview-draft-name{
+  font-size:13px;
+  color:var(--text-primary);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.html-preview-draft-meta{
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:3px;
+}
+
+.html-preview-draft-actions{
+  display:flex;
+  gap:6px;
+  flex-shrink:0;
+}
+
+/* 模板弹窗内容区
+· 以后模板变多时，弹窗本体可上下滑动
+*/
+.html-preview-template-modal-body{
+  max-height:60vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.html-preview-template-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* 模板卡片按钮
+· 这里直接用真正的 button，避免移动端把 div 当成不可交互文本块
+*/
+.html-preview-template-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 12px;
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:12px;
+  cursor:pointer;
+  transition:background 0.15s,border-color 0.15s,transform 0.12s;
+  text-align:left;
+  appearance:none;
+  -webkit-appearance:none;
+  outline:none;
+}
+
+.html-preview-template-item:active{
+  background:var(--bg-hover);
+  border-color:var(--accent-soft);
+  transform:scale(0.985);
+}
+
+.html-preview-template-meta{
+  flex:1;
+  min-width:0;
+}
+
+.html-preview-template-name{
+  font-size:14px;
+  color:var(--text-primary);
+  font-weight:600;
+}
+
+.html-preview-template-desc{
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:4px;
+  line-height:1.6;
+}
+
+.html-preview-template-use{
+  flex-shrink:0;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(124,111,155,0.12);
+  border:1px solid rgba(124,111,155,0.18);
+  color:var(--accent);
+  font-size:11px;
+  line-height:1;
+}

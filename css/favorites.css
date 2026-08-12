@@ -1,0 +1,302 @@
+/* ===== cbyd21_Favorites — 暮屿藏笺 ===== */
+
+/* 暮屿藏笺滑入稳定层
+   · 使用 translate3d 让 iOS/PWA 下页面切换更稳定
+   · backface-visibility 减少返回时闪白和残影 */
+#favoritesApp{
+  transform:translate3d(100%,0,0);
+  -webkit-transform:translate3d(100%,0,0);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  contain:layout paint;
+}
+
+#favoritesApp.active{
+  transform:translate3d(0,0,0);
+  -webkit-transform:translate3d(0,0,0);
+}
+
+/* 暮屿藏笺页面滚动区
+   · 收藏首页和所有子页面共用
+   · iOS 下开启 -webkit-overflow-scrolling，保证滑动顺滑 */
+.fav-page-scroll{
+  flex:1;
+  min-height:0;
+  padding:16px;
+  padding-bottom:max(24px,calc(env(safe-area-inset-bottom,0px) + 18px));
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  touch-action:pan-y;
+}
+
+/* 收藏首页标题区
+   · 显示暮屿藏笺名称和简单说明 */
+.fav-home-title{
+  font-size:18px;
+  font-weight:700;
+  color:var(--text-primary);
+  margin-bottom:6px;
+}
+
+.fav-home-sub{
+  font-size:12px;
+  color:var(--text-muted);
+  line-height:1.6;
+  margin-bottom:16px;
+}
+
+/* 收藏分层列表
+   · 暮屿藏笺不用 tab
+   · 所有模块、角色、分支、存档都以竖向条目进入下一层页面 */
+.fav-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* 收藏入口条目
+   · 用于消息、通话、咫尺朝夕、绘言戏局等模块入口
+   · 也用于角色、分支、时间线、存档等子层级 */
+.fav-entry{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 13px;
+  border-radius:14px;
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  cursor:pointer;
+  transition:background .15s,transform .15s,border-color .15s;
+  min-width:0;
+}
+
+.fav-entry:active{
+  transform:scale(.985);
+  background:var(--bg-hover);
+}
+
+.fav-icon{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  color:var(--accent);
+  background:rgba(124,111,155,.10);
+  border:1px solid rgba(124,111,155,.18);
+  font-size:17px;
+}
+
+.fav-icon svg,
+.fav-empty-icon svg{
+  width:18px;
+  height:18px;
+  display:block;
+  margin:0 auto;
+  stroke:currentColor;
+  flex-shrink:0;
+}
+
+.fav-main{
+  flex:1;
+  min-width:0;
+}
+
+.fav-title{
+  font-size:14px;
+  color:var(--text-primary);
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.fav-sub{
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:4px;
+  line-height:1.45;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.fav-count{
+  font-size:11px;
+  color:var(--accent);
+  flex-shrink:0;
+  max-width:76px;
+  text-align:right;
+  white-space:nowrap;
+}
+
+/* 收藏空状态
+   · 当前层级没有收藏时显示
+   · 不隐藏页面，保留用户所在层级感 */
+.fav-empty{
+  text-align:center;
+  color:var(--text-muted);
+  font-size:13px;
+  line-height:1.8;
+  padding:46px 20px;
+}
+
+.fav-empty-icon{
+  font-size:34px;
+  opacity:.45;
+  margin-bottom:10px;
+}
+
+/* 收藏详情页内部筛选
+   · 只筛选当前层级已经收藏的内容
+   · 不等同于各应用自己的历史搜索 */
+.fav-search-box{
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.fav-search-input{
+  flex:1;
+  min-width:0;
+  height:36px;
+  padding:0 12px;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:var(--bg-input);
+  color:var(--text-primary);
+  font-size:12px;
+  outline:none;
+  font-family:inherit;
+}
+
+/* 收藏内容卡片
+   · 最终一级收藏详情展示
+   · 显示发送者、收藏内容、来源标签和操作按钮 */
+.fav-card{
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  padding:12px 13px;
+  margin-bottom:10px;
+  overflow:hidden;
+}
+
+.fav-card-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:7px;
+}
+
+.fav-speaker{
+  font-size:12px;
+  font-weight:600;
+  color:var(--accent);
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.fav-date{
+  font-size:10px;
+  color:var(--text-muted);
+  margin-left:auto;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+
+/* 收藏正文
+   · 保留换行
+   · 长文本限制高度并允许卡片内部滚动，避免撑爆页面 */
+.fav-content{
+  font-size:13px;
+  color:var(--text-secondary);
+  line-height:1.7;
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  max-height:230px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+
+.fav-tags{
+  margin-top:8px;
+}
+
+/* 收藏来源标签
+   · 显示应用、角色、模式、分支、线下记录、存档、通话等来源信息 */
+.fav-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(124,111,155,.10);
+  border:1px solid rgba(124,111,155,.18);
+  color:var(--accent);
+  font-size:10px;
+  margin-right:5px;
+  margin-top:5px;
+}
+
+/* 收藏卡片操作区
+   · 复制收藏内容
+   · 取消收藏
+   · 后续可扩展跳转来源 */
+.fav-actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+
+.fav-action{
+  border:1px solid var(--border);
+  background:var(--bg-tertiary);
+  color:var(--text-secondary);
+  border-radius:9px;
+  padding:7px 10px;
+  font-size:11px;
+  cursor:pointer;
+  font-family:inherit;
+}
+
+.fav-action.danger{
+  color:var(--danger);
+  border-color:rgba(196,92,92,.35);
+  background:rgba(196,92,92,.08);
+}
+
+/* iOS / PWA 高度兜底
+   · 复用主文件写入的 --cbyd21-ios-pwa-vh
+   · 防止暮屿藏笺在 iOS PWA 下底部被裁切或页面高度闪动 */
+html.ios-device.ios-pwa-standalone #favoritesApp{
+  height:var(--cbyd21-ios-pwa-vh,100dvh)!important;
+  min-height:var(--cbyd21-ios-pwa-vh,100dvh)!important;
+  max-height:var(--cbyd21-ios-pwa-vh,100dvh)!important;
+}
+
+:fullscreen #favoritesApp .app-header,
+:-webkit-full-screen #favoritesApp .app-header{
+  padding-top:44px!important;
+}
+
+body.statusbar-hidden #favoritesApp .app-header{
+  padding-top:max(10px,calc(env(safe-area-inset-top,0px) + 20px));
+}
+
+body.statusbar-hidden:fullscreen #favoritesApp .app-header,
+:fullscreen body.statusbar-hidden #favoritesApp .app-header{
+  padding-top:24px!important;
+}

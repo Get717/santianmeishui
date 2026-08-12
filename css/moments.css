@@ -1,0 +1,1164 @@
+/* ===== moments.css — 动态/朋友圈样式 =====
+ *
+ * 总集：
+ * · 这个文件只负责「动态/朋友圈」页面的外观。
+ * · 包括动态页背景、顶部横幅、用户信息区、动态卡片、点赞块、评论块、动态设置页。
+ * · 不负责聊天界面、记忆、世界书、通话、线下、群聊等功能。
+ * · 动态页使用浅色毛玻璃质感。
+ * · 配色方案由 JS 写入 CSS 变量，下面这些变量是默认值。
+ */
+
+
+/* ===== 动态配色变量 =====
+ * 作用：
+ * · 给动态页、动态设置页、动态 Tab 顶栏提供统一颜色。
+ * · JS 切换配色时，会改这里这些 --moment-* 变量。
+ * · #chatTabView.moments-glass-tab 是为了让动态 Tab 顶栏也能吃到这些变量。
+ */
+#tabMoments,
+#momentSettingsPage,
+#chatTabView.moments-glass-tab {
+  --moment-page-bg: #f5f1e8;
+  --moment-page-overlay: rgba(255,255,255,0.16);
+
+  --moment-card-glass: rgba(255,252,246,0.58);
+  --moment-card-glass-strong: rgba(255,252,246,0.76);
+  --moment-sub-glass: rgba(232,229,240,0.48);
+  --moment-sub-glass-strong: rgba(232,229,240,0.64);
+
+  --moment-border: rgba(255,255,255,0.72);
+  --moment-border-soft: rgba(255,255,255,0.46);
+
+  --moment-text: #2f2d33;
+  --moment-text-secondary: rgba(47,45,51,0.76);
+  --moment-text-muted: rgba(47,45,51,0.52);
+  --moment-accent: #8f82b4;
+
+  --moment-blur: blur(22px) saturate(1.45);
+  --moment-shadow: 0 12px 30px rgba(96,82,70,0.12), inset 0 1px 0 rgba(255,255,255,0.66);
+  --moment-shadow-soft: 0 7px 18px rgba(96,82,70,0.09), inset 0 1px 0 rgba(255,255,255,0.54);
+
+  background-color: var(--moment-page-bg);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  color: var(--moment-text);
+}
+
+
+/* ===== 动态 Tab 顶栏 =====
+ * 作用：
+ * · 只在切到「动态」Tab 时改顶栏颜色。
+ * · 不改顶栏高度。
+ * · 不改按钮大小。
+ * · 不改 SVG 图标。
+ */
+#chatTabView.moments-glass-tab .tab-header {
+  background: rgba(255,255,255,0.42);
+  border-bottom: 1px solid var(--moment-border-soft);
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+}
+
+
+/* ===== 动态 Tab 顶栏标题 =====
+ * 作用：
+ * · 让「动态」标题颜色跟当前动态配色走。
+ */
+#chatTabView.moments-glass-tab .tab-header-title {
+  color: var(--moment-text);
+}
+
+
+/* ===== 动态 Tab 顶栏按钮 =====
+ * 作用：
+ * · 动态页右上角设置按钮、刷新按钮使用浅色玻璃按钮。
+ * · 按钮尺寸仍然沿用主文件 .app-back-btn。
+ */
+#chatTabView.moments-glass-tab .app-back-btn {
+  background: rgba(255,255,255,0.34);
+  border-color: var(--moment-border-soft);
+  color: var(--moment-text-secondary);
+}
+
+
+/* ===== 动态页主体 =====
+ * 作用：
+ * · 让动态页可以承载自定义背景图。
+ * · position: relative 是为了放背景遮罩。
+ */
+#tabMoments {
+  position: relative;
+}
+
+
+/* ===== 动态页背景遮罩 =====
+ * 作用：
+ * · 用户设置整页背景图后，遮一层浅色雾面。
+ * · 防止背景图太花导致动态文字看不清。
+ */
+#tabMoments::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--moment-page-overlay);
+  z-index: 0;
+}
+
+
+/* ===== 动态页内容层级 =====
+ * 作用：
+ * · 保证横幅、用户信息、动态卡片显示在背景遮罩上方。
+ */
+#tabMoments > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ===== 顶部横幅容器 =====
+ * 作用：
+ * · 动态主页顶部那张横幅。
+ * · 未上传时显示加号提示。
+ * · 上传后只显示图片，不显示额外文字。
+ */
+.moment-top-banner {
+  position: relative;
+  width: calc(100% - 28px);
+  height: 122px;
+  margin: 0 14px;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 0 0 18px 18px;
+  background: var(--moment-sub-glass);
+  border: 1px solid var(--moment-border-soft);
+  border-top: none;
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+  box-shadow: var(--moment-shadow-soft);
+}
+
+
+/* ===== 顶部横幅图片 =====
+ * 作用：
+ * · 用户上传或输入 URL 后，横幅图片铺满整个横幅区域。
+ */
+.moment-top-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+}
+
+
+/* ===== 顶部横幅空状态文字 =====
+ * 作用：
+ * · 没有上传横幅时显示提示。
+ * · 上传图片后 JS 会把这个元素替换成 img，所以不会继续显示。
+ */
+.moment-top-banner-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--moment-text-muted);
+}
+
+
+/* ===== 顶部横幅空状态加号 =====
+ * 作用：
+ * · 未设置横幅时，显示一个圆形加号。
+ * · 提醒用户这里可以点击上传横幅。
+ */
+.moment-top-banner-placeholder::before {
+  content: "+";
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--moment-border-soft);
+  background: rgba(255,255,255,0.30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--moment-accent);
+  font-size: 24px;
+  font-weight: 300;
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+}
+
+
+/* ===== 顶部用户信息区 =====
+ * 作用：
+ * · 横幅下方的头像、用户名、发动态按钮。
+ * · margin-top 为负数，让头像稍微压在横幅上。
+ */
+.moment-top-user {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 0 16px;
+  margin-top: -24px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 14px;
+}
+
+
+/* ===== 顶部用户头像 =====
+ * 作用：
+ * · 显示当前用户面具头像。
+ * · 没有头像时显示名字首字。
+ */
+.moment-top-user-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--moment-card-glass);
+  border: 2px solid var(--moment-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--moment-accent);
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+  box-shadow: var(--moment-shadow-soft);
+}
+
+
+/* ===== 顶部用户头像图片 =====
+ * 作用：
+ * · 让头像图片铺满圆形头像框。
+ */
+.moment-top-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ===== 顶部用户名 =====
+ * 作用：
+ * · 显示当前用户面具名称。
+ */
+.moment-top-user-name {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--moment-text);
+  margin-bottom: 7px;
+  flex: 1;
+}
+
+
+/* ===== 发动态按钮 =====
+ * 作用：
+ * · 点击后打开用户发动态弹窗。
+ */
+.moment-post-btn {
+  padding: 7px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--moment-border-soft);
+  background: var(--moment-sub-glass);
+  color: var(--moment-accent);
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-bottom: 5px;
+  transition: all 0.15s;
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+  box-shadow: var(--moment-shadow-soft);
+}
+
+
+/* ===== 发动态按钮按下反馈 =====
+ * 作用：
+ * · 点击时轻微缩小，给用户一个触感反馈。
+ */
+.moment-post-btn:active {
+  transform: scale(0.96);
+  background: var(--moment-sub-glass-strong);
+}
+
+
+/* ===== 动态卡片 =====
+ * 作用：
+ * · 每一条朋友圈动态的外层卡片。
+ * · 默认是浅色毛玻璃卡片。
+ */
+.moment-card {
+  position: relative;
+  overflow: hidden;
+  margin: 0 14px 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--moment-card-glass);
+  border: 1px solid var(--moment-border);
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+  box-shadow: var(--moment-shadow);
+}
+
+
+/* 头部装饰图的实际显示规则集中在下方“动态卡片头部装饰图”区域。 */
+
+
+/* ===== 动态卡片头部装饰图层 =====
+ * 作用：
+ * · 某个角色设置头部装饰图后，这个图层负责承载图片。
+ * · class 名继续沿用 moment-card-bg，是为了兼容旧 JS 渲染结构。
+ * · 实际显示高度和位置由下方 .moment-card.with-bg .moment-card-bg 控制。
+ */
+.moment-card-bg {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+
+/* ===== 动态卡片头部装饰图遮罩 =====
+ * 作用：
+ * · 盖在头部装饰图上方，保证头像、名字和时间可读。
+ * · class 名继续沿用 moment-card-bg-mask，是为了兼容旧 JS 渲染结构。
+ * · 实际显示高度和遮罩效果由下方 .moment-card.with-bg .moment-card-bg-mask 控制。
+ */
+.moment-card-bg-mask {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--moment-card-glass-strong);
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+}
+
+
+/* ===== 开启头部装饰图层 =====
+ * 作用：
+ * · 只有卡片带 with-bg 类时，才显示头部装饰图和遮罩。
+ */
+.moment-card.with-bg .moment-card-bg,
+.moment-card.with-bg .moment-card-bg-mask {
+  display: block;
+}
+
+
+/* ===== 动态卡片内容层级 =====
+ * 作用：
+ * · 让头像、文字、按钮、评论显示在头部装饰图和遮罩上方。
+ */
+.moment-card > *:not(.moment-card-bg):not(.moment-card-bg-mask) {
+  position: relative;
+  z-index: 2;
+}
+
+
+/* ===== 动态卡片头部 =====
+ * 作用：
+ * · 头像、角色名、时间、删除按钮所在的横向区域。
+ */
+.moment-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+
+/* ===== 动态作者头像 =====
+ * 作用：
+ * · 显示发动态的角色头像或用户头像。
+ */
+.moment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--moment-sub-glass);
+  border: 1px solid var(--moment-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--moment-accent);
+  overflow: hidden;
+  flex-shrink: 0;
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+}
+
+
+/* ===== 动态作者头像图片 =====
+ * 作用：
+ * · 让头像图片铺满圆形头像框。
+ */
+.moment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ===== 动态作者信息区 =====
+ * 作用：
+ * · 包住作者名字和发布时间。
+ */
+.moment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+
+/* ===== 动态作者名字 =====
+ * 作用：
+ * · 显示发动态的人是谁。
+ */
+.moment-name {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--moment-text);
+}
+
+
+/* ===== 动态发布时间 =====
+ * 作用：
+ * · 显示动态发布时间。
+ */
+.moment-time {
+  font-size: 10px;
+  color: var(--moment-text-muted);
+  margin-top: 2px;
+}
+
+
+/* ===== 动态正文 =====
+ * 作用：
+ * · 显示动态文字内容。
+ * · 保留换行。
+ */
+.moment-body {
+  font-size: 14px;
+  line-height: 1.72;
+  color: var(--moment-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 10px;
+}
+
+
+/* ===== 动态图片区域 =====
+ * 作用：
+ * · 显示 AI 生成的图片描述占位，或用户上传的图片。
+ */
+.moment-images {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+
+/* ===== 单张图片布局 =====
+ * 作用：
+ * · 只有一张图片时，不铺满三列，而是保持较舒服的宽度。
+ */
+.moment-images.single {
+  grid-template-columns: 1fr;
+  max-width: 260px;
+}
+
+
+/* ===== 多张图片布局 =====
+ * 作用：
+ * · 多张图时按三列排列。
+ */
+.moment-images.multi {
+  grid-template-columns: repeat(3,1fr);
+}
+
+
+/* ===== 单个图片格子 =====
+ * 作用：
+ * · 每张图片或图片描述占位的外壳。
+ */
+.moment-img {
+  aspect-ratio: 1;
+  background: var(--moment-sub-glass);
+  border: 1px solid var(--moment-border-soft);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+
+/* ===== 图片描述占位文字 =====
+ * 作用：
+ * · AI 发动态时如果生成了 [图片:描述]，这里显示描述。
+ */
+.moment-img-placeholder {
+  font-size: 11px;
+  color: var(--moment-text-muted);
+  text-align: center;
+  padding: 6px;
+}
+
+
+/* ===== 动态操作栏 =====
+ * 作用：
+ * · 放点赞按钮和评论按钮。
+ */
+.moment-actions {
+  display: flex;
+  gap: 8px;
+  padding: 5px 0 0;
+}
+
+
+/* ===== 动态操作按钮 =====
+ * 作用：
+ * · 点赞按钮、评论按钮的基础样式。
+ */
+.moment-action-btn {
+  height: 31px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--moment-text-muted);
+  transition: all 0.15s;
+  border: 1px solid var(--moment-border-soft);
+  background: var(--moment-sub-glass);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+
+/* ===== 动态操作按钮按下反馈 =====
+ * 作用：
+ * · 点击点赞/评论时轻微缩小。
+ */
+.moment-action-btn:active {
+  transform: scale(0.96);
+  background: var(--moment-sub-glass-strong);
+}
+
+
+/* ===== 已点赞按钮 =====
+ * 作用：
+ * · 用户已经点赞时，让点赞按钮变成强调色。
+ */
+.moment-action-btn.liked {
+  color: var(--moment-accent);
+  background: rgba(255,255,255,0.36);
+}
+
+
+/* ===== 已点赞按钮图标 =====
+ * 作用：
+ * · 用户已经点赞时，爱心图标填充强调色。
+ */
+.moment-action-btn.liked svg {
+  stroke: var(--moment-accent);
+  fill: var(--moment-accent);
+}
+
+
+/* ===== 点赞列表块 =====
+ * 作用：
+ * · 显示哪些人点了赞。
+ */
+.moment-likes {
+  font-size: 12px;
+  color: var(--moment-text-secondary);
+  padding: 8px 11px;
+  background: var(--moment-sub-glass);
+  border: 1px solid var(--moment-border-soft);
+  border-radius: 13px;
+  margin-top: 9px;
+  margin-bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  flex-wrap: wrap;
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+}
+
+
+/* ===== 评论整体块 =====
+ * 作用：
+ * · 所有评论放在同一个玻璃块里。
+ * · 不再每条评论单独一个大灰块。
+ */
+.moment-comment-block {
+  margin-top: 9px !important;
+  background: var(--moment-sub-glass) !important;
+  border: 1px solid var(--moment-border-soft) !important;
+  border-radius: 13px !important;
+  padding: 8px 11px !important;
+  overflow: hidden !important;
+  color: var(--moment-text-secondary) !important;
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+}
+
+
+/* ===== 单行评论 =====
+ * 作用：
+ * · 每一条评论或回复的文字行。
+ */
+.moment-comment-line {
+  color: var(--moment-text-secondary) !important;
+}
+
+
+/* ===== 评论内部普通文字 =====
+ * 作用：
+ * · 让评论内部 span 默认继承评论行颜色。
+ */
+.moment-comment-line span {
+  color: inherit;
+}
+
+
+/* ===== 评论里的角色名 / 用户名 =====
+ * 作用：
+ * · 让评论中的名字使用动态强调色。
+ */
+.moment-comment-line span[style*="var(--accent)"] {
+  color: var(--moment-accent) !important;
+}
+
+
+/* ===== 评论里的弱化文字 =====
+ * 作用：
+ * · 比如“回复某某”、回复按钮、次要提示。
+ */
+.moment-comment-line span[style*="var(--text-muted)"] {
+  color: var(--moment-text-muted) !important;
+}
+
+
+/* ===== 旧评论容器兼容 =====
+ * 作用：
+ * · 兼容旧版 moments.js 里可能还用到的 .moment-comments。
+ */
+.moment-comments {
+  padding: 4px 0;
+}
+
+
+/* ===== 旧单条评论兼容 =====
+ * 作用：
+ * · 兼容旧版每条评论的样式。
+ */
+.moment-comment {
+  font-size: 12px;
+  color: var(--moment-text-secondary);
+  padding: 5px 0;
+  background: transparent;
+  border-radius: 0;
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+
+/* ===== 旧评论名字兼容 =====
+ * 作用：
+ * · 兼容旧版评论名字样式。
+ */
+.moment-comment-name {
+  font-weight: 600;
+  color: var(--moment-accent);
+  margin-right: 4px;
+}
+
+
+/* ===== 动态空状态 =====
+ * 作用：
+ * · 没有任何动态时显示提示。
+ */
+.moment-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--moment-text-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+
+/* ===== 动态设置页主体 =====
+ * 作用：
+ * · 动态设置页自己的背景。
+ * · 防止设置页打开后透出底下动态列表。
+ */
+#momentSettingsPage {
+  background-color: var(--moment-page-bg);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+
+/* ===== 动态设置页背景遮罩 =====
+ * 作用：
+ * · 设置页如果用了动态页背景图，也盖一层浅色雾面。
+ * · 同时保证它不会透出下面的动态页。
+ */
+#momentSettingsPage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--moment-page-overlay);
+  z-index: 0;
+}
+
+
+/* ===== 动态设置页内容层级 =====
+ * 作用：
+ * · 保证设置页顶栏和设置卡片在背景遮罩上方。
+ */
+#momentSettingsPage > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ===== 动态设置页顶栏 =====
+ * 作用：
+ * · 只改动态设置页顶栏颜色。
+ * · 不改高度、不改布局。
+ */
+#momentSettingsPage .app-header {
+  background: rgba(255,255,255,0.42);
+  border-bottom: 1px solid var(--moment-border-soft);
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+}
+
+
+/* ===== 动态设置页顶栏按钮 =====
+ * 作用：
+ * · 设置页返回按钮使用浅色玻璃质感。
+ * · 按钮尺寸继续沿用主文件 .app-back-btn。
+ */
+#momentSettingsPage .app-back-btn {
+  background: rgba(255,255,255,0.34);
+  border-color: var(--moment-border-soft);
+  color: var(--moment-text-secondary);
+}
+
+
+/* ===== 动态设置页滚动区域 =====
+ * 作用：
+ * · 控制设置页内容边距。
+ */
+.moment-settings-scroll {
+  padding: 14px 14px 28px;
+}
+
+
+/* ===== 动态设置页卡片 =====
+ * 作用：
+ * · 设置页里每一个设置分组的玻璃卡片。
+ */
+.moment-settings-card {
+  padding: 14px;
+  margin-bottom: 12px;
+  border-radius: 18px;
+  background: var(--moment-card-glass);
+  border: 1px solid var(--moment-border);
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+  box-shadow: var(--moment-shadow-soft);
+}
+
+
+/* ===== 动态设置页分组标题 =====
+ * 作用：
+ * · 比如“配色方案”“动态页整体背景”“角色动态头部装饰图”。
+ */
+.moment-settings-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--moment-text);
+  margin-bottom: 10px;
+}
+
+
+/* ===== 配色按钮区域 =====
+ * 作用：
+ * · 放五套配色方案按钮。
+ */
+.moment-palette-grid {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+
+/* ===== 配色按钮 =====
+ * 作用：
+ * · 单个配色方案按钮。
+ */
+.moment-palette-btn {
+  border: 1px solid var(--moment-border-soft);
+  background: var(--moment-sub-glass);
+  color: var(--moment-text-secondary);
+  font-size: 11px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: var(--moment-blur);
+  -webkit-backdrop-filter: var(--moment-blur);
+}
+
+
+/* ===== 当前选中的配色按钮 =====
+ * 作用：
+ * · 用户当前正在使用的配色方案。
+ */
+.moment-palette-btn.active {
+  background: var(--moment-accent);
+  color: #fff;
+  border-color: rgba(255,255,255,0.45);
+}
+
+
+/* ===== 角色头部装饰图列表 =====
+ * 作用：
+ * · 动态设置页里“按角色设置头部装饰图”的滚动列表。
+ * · 角色很多时不会把页面撑得无限长。
+ */
+.moment-role-bg-list {
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+
+/* ===== 角色头部装饰图条目 =====
+ * 作用：
+ * · 每个角色一个条目。
+ * · 上方一行放头像、名字、状态、上传/URL/清除按钮。
+ * · 展开后下方显示透明度和模糊强度滑条。
+ */
+.moment-role-bg-item {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(124,111,155,0.12);
+}
+
+
+/* ===== 角色头部装饰图列表最后一行 =====
+ * 作用：
+ * · 最后一行不显示底部分割线。
+ */
+.moment-role-bg-item:last-child {
+  border-bottom: none;
+}
+
+
+/* ===== 角色头部装饰图列表头像 =====
+ * 作用：
+ * · 设置页角色列表里的头像。
+ */
+.moment-role-bg-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--moment-sub-glass);
+  border: 1px solid var(--moment-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--moment-accent);
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+
+/* ===== 角色头部装饰图列表头像图片 =====
+ * 作用：
+ * · 让角色头像图片铺满圆形头像框。
+ */
+.moment-role-bg-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ===== 角色头部装饰图文字信息区 =====
+ * 作用：
+ * · 包住角色名和装饰图状态。
+ */
+.moment-role-bg-info {
+  flex: 1;
+  min-width: 0;
+}
+
+
+/* ===== 角色头部装饰图角色名 =====
+ * 作用：
+ * · 显示当前这一行对应哪个角色。
+ */
+.moment-role-bg-name {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--moment-text);
+}
+
+
+/* ===== 角色头部装饰图状态文字 =====
+ * 作用：
+ * · 显示“已设置头部装饰图”或“未设置装饰图”。
+ */
+.moment-role-bg-status {
+  font-size: 10px;
+  color: var(--moment-text-muted);
+  margin-top: 2px;
+}
+
+
+/* ===== 角色头部装饰图操作按钮区 =====
+ * 作用：
+ * · 放“上传 / URL / 清除”三个按钮。
+ */
+.moment-role-bg-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+
+/* ===== 角色头部装饰图小按钮 =====
+ * 作用：
+ * · 设置页角色列表里的上传、URL、清除按钮。
+ */
+.moment-mini-btn {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 9px;
+  border: 1px solid var(--moment-border-soft);
+  background: var(--moment-sub-glass);
+  color: var(--moment-text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+
+/* ===== 角色头部装饰图危险按钮 =====
+ * 作用：
+ * · 清除按钮使用危险色。
+ */
+.moment-mini-btn.danger {
+  color: var(--danger);
+}
+
+/* ===== 动态卡片头部装饰图 =====
+ * 作用：
+ * · 这块从 index.html 拆回 moments.css，避免动态模块样式散落在主文件里。
+ * · 上传图不再作为整张动态卡片背景，而是作为头像 / 名字 / 时间所在头部区域的装饰图。
+ * · 动态卡片高度会随正文、图片、评论变化；头部高度相对稳定，所以把图片限制在头部最稳。
+ * · 不固定整张卡片高度，不做内部滚动，避免手机上“页面滚动 + 卡片内部滚动”互相抢手势。
+ */
+.moment-card.with-bg {
+  overflow: hidden;
+  background: var(--moment-card-glass) !important;
+}
+
+/* 头部装饰图：
+   · 固定在卡片顶部一小段区域
+   · 使用 cover 填满头部装饰条
+   · 不再跟随整张卡片高度变化
+   · 不再做默认模糊，模糊交给用户滑条自己调
+*/
+.moment-card.with-bg .moment-card-bg {
+  inset: 0 0 auto 0 !important;
+  height: 76px !important;
+  max-height: 100% !important;
+  opacity: var(--moment-card-bg-opacity, 0.78) !important;
+  filter: blur(var(--moment-card-bg-blur, 0px)) saturate(1.04) !important;
+  transform: none !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  border-radius: 18px 18px 0 0;
+  pointer-events: none;
+}
+
+/* 头部装饰图遮罩：
+   · 只覆盖头部装饰区域，不再覆盖整张卡片
+   · 只保留轻薄遮罩保证头像、名字、时间可读
+*/
+.moment-card.with-bg .moment-card-bg-mask {
+  inset: 0 0 auto 0 !important;
+  height: 76px !important;
+  max-height: 100% !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.22),
+    rgba(255,255,255,0.10)
+  ) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: inset 0 -1px 0 var(--moment-border-soft);
+  pointer-events: none;
+}
+
+html:not(.light-mode) .moment-card.with-bg .moment-card-bg-mask {
+  background: linear-gradient(
+    to bottom,
+    rgba(8,8,14,0.26),
+    rgba(8,8,14,0.12)
+  ) !important;
+}
+
+/* 旧版顶部淡出伪元素不再需要。
+   现在图片只作为头部装饰条，不需要向正文区域过渡。 */
+.moment-card.with-bg .moment-card-bg::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* 带头部装饰图的卡片需要给正文预留位置。
+ * .moment-card-bg 是 absolute 图层，不占文档流；
+ * 如果不额外拉开 header 和正文的距离，正文会压到装饰图上。
+ */
+.moment-card.with-bg .moment-header {
+  margin-bottom: 28px;
+}
+
+/* 兜底：如果某些主题或外部样式改了 header 高度，
+ * 至少保证正文和头部装饰图之间有一点空隙。
+ */
+.moment-card.with-bg .moment-body {
+  margin-top: 2px;
+}
+
+/* ===== 动态头部装饰图角色列表展开调节区 =====
+ * 作用：
+ * · 未展开时保持头像 / 信息 / 按钮一整行。
+ * · 展开后滑条独占下一整行。
+ * · 避免滑条被右侧“上传 / URL / 清除”按钮挤到完全不好拖。
+ */
+.moment-role-bg-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.moment-role-bg-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.moment-role-bg-main .moment-role-bg-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.moment-role-bg-main .moment-role-bg-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.moment-role-bg-adjust {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 12px 10px;
+  background: var(--moment-sub-glass);
+  border: 1px solid var(--moment-border-soft);
+  border-radius: 12px;
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+}
+
+.moment-role-bg-adjust-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0,1fr) 44px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.moment-role-bg-adjust-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.moment-role-bg-adjust-label {
+  font-size: 11px;
+  color: var(--moment-text-muted);
+  white-space: nowrap;
+}
+
+.moment-role-bg-adjust-value {
+  font-size: 11px;
+  color: var(--moment-text-secondary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 覆盖主文件里 .app-scroll input[type="range"] 的 max-width:180px。
+   头部装饰图调节滑条需要像“上下文轮数限制”那样铺满可用宽度。 */
+.moment-role-bg-adjust input[type="range"] {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  accent-color: var(--moment-accent);
+}
+
+.moment-role-bg-adjust .form-hint {
+  margin-top: 10px;
+  line-height: 1.55;
+  color: var(--moment-text-muted);
+}
+
+@media(max-width:420px) {
+  .moment-role-bg-main {
+    gap: 10px;
+  }
+
+  .moment-role-bg-main .moment-role-bg-actions {
+    gap: 4px;
+  }
+
+  .moment-role-bg-adjust {
+    padding: 11px 10px 9px;
+  }
+
+  .moment-role-bg-adjust-row {
+    grid-template-columns: 58px minmax(0,1fr) 40px;
+    gap: 8px;
+  }
+}

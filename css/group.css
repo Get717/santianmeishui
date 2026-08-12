@@ -1,0 +1,31 @@
+/* ===== 群聊样式 ===== */
+
+/* 消息列表里的群聊拼接头像（2x2网格） */
+.group-avatar-grid{
+  width:46px;
+  height:46px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:2px;
+  border-radius:50%;
+  overflow:hidden;
+  background:var(--bg-tertiary);
+  border:1px solid var(--border);
+}
+.group-avatar-cell{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  color:var(--accent);
+  background:var(--bg-tertiary);
+  overflow:hidden;
+}
+.group-avatar-cell img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+

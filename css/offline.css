@@ -1,0 +1,343 @@
+/* ===== cbyd21_Offline — 线下模式样式 =====
+ * 咫尺朝夕 — 线下见面模式的全部样式
+ * 包含：角色选择列表、聊天卡片、输入区、预设编辑页、记录查看页、退出弹窗
+ */
+
+/* 角色选择列表项 */
+.offline-char-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background 0.15s}
+.offline-char-item:active{background:var(--bg-hover)}
+
+/* 角色头像（选择列表） */
+.offline-char-avatar{width:44px;height:44px;border-radius:50%;background:var(--bg-tertiary);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--accent);overflow:hidden;flex-shrink:0}
+.offline-char-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+
+/* 角色信息（名称+状态） */
+.offline-char-info{flex:1;min-width:0}
+.offline-char-name{font-size:14px;font-weight:600;color:var(--text-primary)}
+.offline-char-status{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* 聊天滚动区（支持壁纸） */
+.offline-chat-scroll{flex:1;overflow-y:auto;padding:16px;padding-bottom:220px;scroll-behavior:smooth;background-size:cover;background-position:center center;background-repeat:no-repeat}
+
+/* 消息卡片（线下模式的消息不是气泡，是带边框的卡片） */
+.offline-msg-card{background:var(--bg-card);border:1px solid var(--border-soft);border-radius:16px;margin-bottom:14px;overflow:hidden;animation:msgIn 0.3s ease;position:relative}
+.offline-msg-card.ai-card{border-left:3px solid var(--accent)}
+.offline-msg-card.user-card{border-left:3px solid var(--text-muted);background:var(--bg-tertiary)}
+
+/* 卡片头部（头像+名字+时间+操作按钮） */
+.offline-msg-header{display:flex;align-items:center;gap:10px;padding:12px 14px 0}
+.offline-msg-av{width:32px;height:32px;border-radius:50%;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--accent)}
+.offline-msg-av img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.offline-msg-meta{flex:1;min-width:0}
+.offline-msg-name{font-size:12px;font-weight:600;color:var(--text-secondary)}
+.offline-msg-time{font-size:10px;color:var(--text-muted)}
+
+/* 卡片右上角操作按钮（三点菜单） */
+.offline-msg-acts{width:28px;height:28px;border-radius:6px;border:none;background:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.offline-msg-acts:active{background:var(--bg-hover)}
+
+/* 卡片正文 */
+.offline-msg-body{padding:10px 14px;font-size:14px;line-height:1.75;color:var(--text-primary);white-space:pre-wrap;word-break:break-word}
+.offline-msg-body strong{font-weight:600}
+.offline-msg-body em{font-style:italic;color:var(--text-secondary)}
+
+/* 卡片底部（token计数） */
+.offline-msg-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 14px 10px;font-size:10px;color:var(--text-muted)}
+.offline-msg-tokens{font-family:'SF Mono','Fira Code',monospace;opacity:0.6}
+
+/* 底部输入区（固定定位） */
+.offline-input-area{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--bg-secondary);border-top:1px solid var(--border-soft);padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}
+.offline-input-area::after{content:'';position:absolute;left:0;right:0;top:100%;height:50px;background:var(--bg-secondary)}
+.offline-input-row{display:flex;gap:8px;align-items:center}
+.offline-input-wrap{flex:1;min-width:0;background:var(--bg-input);border:1px solid var(--border);border-radius:22px;padding:8px 16px;display:flex;align-items:flex-end}
+.offline-input-wrap:focus-within{border-color:var(--accent-soft)}
+.offline-input-wrap textarea{flex:1;background:none;border:none;outline:none;color:var(--text-primary);font-size:14px;line-height:1.5;resize:none;max-height:120px;height:22px;min-height:22px;font-family:inherit;overflow-y:hidden}
+.offline-input-wrap textarea::-webkit-scrollbar{width:3px}
+.offline-input-wrap textarea::-webkit-scrollbar-track{background:transparent}
+.offline-input-wrap textarea::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:2px}
+
+/* 操作按钮行（重新生成等） */
+.offline-action-row{display:flex;gap:8px;margin-top:8px;justify-content:center}
+.offline-act-btn{padding:6px 16px;border-radius:18px;border:1px solid var(--border);background:var(--bg-tertiary);color:var(--text-secondary);font-size:12px;cursor:pointer;transition:all 0.15s}
+.offline-act-btn:active{background:var(--bg-hover);color:var(--text-primary)}
+.offline-act-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* 预设编辑页提示文字 */
+.offline-preset-hint{padding:12px;background:rgba(124,111,155,0.08);border:1px solid rgba(124,111,155,0.15);border-radius:10px;font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:16px}
+
+/* 开场白卡片 */
+.offline-opening-card{background:rgba(124,111,155,0.08);border:1px solid rgba(124,111,155,0.15);border-radius:14px;padding:14px 16px;margin-bottom:14px;font-size:13px;line-height:1.7;color:var(--text-secondary);font-style:italic;white-space:pre-wrap}
+
+/* 打字指示器 */
+.offline-typing{display:none;margin-bottom:14px}
+.offline-typing.active{display:block}
+.offline-typing-inner{background:var(--bg-card);border:1px solid var(--border-soft);border-left:3px solid var(--accent);border-radius:16px;padding:16px;display:flex;align-items:center;gap:10px}
+
+/* 线下记录查看页（全屏滑入） */
+.offline-record-page{position:fixed;inset:0;z-index:170;background:var(--bg-primary);transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow:hidden;visibility:hidden}
+.offline-record-page.active{transform:translateX(0);visibility:visible;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),visibility 0s 0s}
+
+/* 记录页摘要信息 */
+.offline-session-summary{text-align:center;padding:16px;font-size:12px;color:var(--text-muted);border-bottom:1px solid var(--border-soft)}
+
+/* 退出确认弹窗 */
+.offline-exit-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center}
+.offline-exit-overlay.active{display:flex}
+.offline-exit-box{background:var(--bg-card);border-radius:16px;padding:24px 20px;margin:0 32px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+
+/* 线下行动选项浮层
+   · 挂在 offlineApp 直属层，不参与 offlineChatView flex 布局
+   · 默认不拦截点击，只有气泡和面板本体可点
+*/
+.offline-action-float-layer{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:none;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.offline-action-float-layer.active{
+  display:block;
+  pointer-events:none;
+}
+
+/* globalFloatLayer 兼容兜底
+   offlineActionFloatLayer 会被 JS 挂到 #globalFloatLayer 下。
+   #globalFloatLayer > * 的通用规则会让直属子元素可点击，
+   因此这里必须强制线下行动选项的全屏容器不可命中，
+   否则 AI 回复完成后重新显示选项时，会留下一层透明全屏点击层。
+*/
+#globalFloatLayer > #offlineActionFloatLayer{
+  pointer-events:none!important;
+}
+
+#globalFloatLayer > #offlineActionFloatLayer .offline-action-choice-fab.visible{
+  pointer-events:auto!important;
+}
+
+#globalFloatLayer > #offlineActionFloatLayer .offline-action-choice-area.active{
+  pointer-events:auto!important;
+}
+
+#globalFloatLayer > #offlineActionFloatLayer .offline-action-choice-panel,
+#globalFloatLayer > #offlineActionFloatLayer .offline-action-choice-btn,
+#globalFloatLayer > #offlineActionFloatLayer .offline-action-choice-panel-head button{
+  pointer-events:auto!important;
+}
+
+/* 行动选项隐藏态兜底
+   · 全屏 layer 只作为定位容器，永远不可命中
+   · 真正显示/隐藏只控制面板 area 和气泡 fab
+*/
+.offline-action-choice-area:not(.active){
+  display:none!important;
+  pointer-events:none!important;
+}
+
+.offline-action-choice-fab:not(.visible){
+  display:none!important;
+  pointer-events:none!important;
+}
+
+/* 线下行动选项气泡
+   · AI 回复结束后出现
+   · 用户点击后才打开选项面板，不遮挡正文阅读
+   · JS 负责拖动和位置保存
+*/
+.offline-action-choice-fab{
+  position:absolute;
+  right:16px;
+  bottom:92px;
+  z-index:3;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  min-width:48px;
+  height:38px;
+  padding:0 14px;
+  border:none;
+  border-radius:999px;
+  background:rgba(124,111,155,0.88);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  cursor:pointer;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.20);
+  backdrop-filter:blur(20px) saturate(1.18);
+  -webkit-backdrop-filter:blur(20px) saturate(1.18);
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:none;
+  pointer-events:auto;
+  opacity:0.92;
+  transition:
+    opacity 0.18s ease,
+    transform 0.16s ease,
+    left 0.22s ease,
+    right 0.22s ease,
+    top 0.22s ease,
+    bottom 0.22s ease;
+}
+
+.offline-action-choice-fab.visible{
+  display:flex!important;
+}
+
+.offline-action-choice-fab:active,
+.offline-action-choice-fab.dragging{
+  opacity:1;
+  transform:scale(1.05);
+}
+
+/* 点击气泡后出现的选项面板 */
+.offline-action-choice-area{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:2;
+  display:none;
+  padding:0 12px;
+  padding-bottom:max(86px,calc(env(safe-area-inset-bottom,0px) + 86px));
+  pointer-events:none;
+}
+
+.offline-action-choice-area.active{
+  display:block!important;
+  pointer-events:auto;
+}
+
+.offline-action-choice-panel{
+  position:relative;
+  z-index:1;
+  max-width:360px;
+  margin:0 auto;
+  border-radius:18px;
+  padding:12px;
+  background:rgba(18,18,26,0.86);
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 14px 38px rgba(0,0,0,0.28);
+  backdrop-filter:blur(24px) saturate(1.18);
+  -webkit-backdrop-filter:blur(24px) saturate(1.18);
+  pointer-events:auto;
+  animation:offlineChoicePanelIn 0.18s ease;
+}
+
+html.light-mode .offline-action-choice-panel{
+  background:rgba(255,255,255,0.86);
+  border-color:rgba(0,0,0,0.08);
+  box-shadow:0 14px 34px rgba(0,0,0,0.10);
+}
+
+@keyframes offlineChoicePanelIn{
+  from{opacity:0;transform:translateY(8px) scale(0.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.offline-action-choice-panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:10px;
+  padding:0 2px;
+  font-size:12px;
+  color:var(--text-muted);
+}
+
+.offline-action-choice-panel-head span{
+  font-weight:700;
+  color:var(--text-secondary);
+}
+
+.offline-action-choice-panel-head button{
+  width:24px;
+  height:24px;
+  border:none;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  color:var(--text-muted);
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+}
+
+html.light-mode .offline-action-choice-panel-head button{
+  background:rgba(0,0,0,0.05);
+}
+
+.offline-action-choice-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:min(44vh,320px);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  pointer-events:auto!important;
+}
+
+.offline-action-choice-list::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
+}
+
+.offline-action-choice-btn{
+  width:100%;
+  padding:10px 12px;
+  border-radius:13px;
+  border:1px solid rgba(124,111,155,0.26);
+  background:rgba(124,111,155,0.14);
+  color:var(--text-primary);
+  font-size:13px;
+  line-height:1.45;
+  text-align:left;
+  cursor:pointer;
+  white-space:normal;
+  word-break:break-word;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
+  pointer-events:auto!important;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+.offline-action-choice-btn:active{
+  transform:scale(0.985);
+  background:rgba(124,111,155,0.24);
+}
+
+.offline-action-choice-empty{
+  padding:12px 10px;
+  border-radius:13px;
+  background:rgba(124,111,155,0.10);
+  border:1px dashed rgba(124,111,155,0.24);
+  color:var(--text-muted);
+  font-size:12px;
+  line-height:1.7;
+  text-align:center;
+}
+
+/* 电脑端手机框适配 */
+@media(min-width:768px){
+.cbyd21-phone-frame .offline-input-area{position:absolute}
+.cbyd21-phone-frame .offline-record-page{position:absolute}
+.cbyd21-phone-frame .offline-exit-overlay{position:absolute}
+.cbyd21-phone-frame #offlineSidebarOverlay{position:absolute}
+.cbyd21-phone-frame #offlineSidebar{position:absolute}
+}
+
+/* 线下侧边栏层级：高于输入栏(z-index:100)，不被盖住 */
+#offlineSidebarOverlay{z-index:110!important}
+#offlineSidebar{z-index:111!important}
+
+/* 有壁纸时，滚动区背景必须透明，否则CSS美化的背景会挡住壁纸 */
+#offlineChatView.has-wallpaper .offline-chat-scroll{
+  background:transparent!important;
+}

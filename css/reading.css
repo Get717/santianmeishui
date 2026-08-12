@@ -1,0 +1,782 @@
+/* ===== reading.css — 素页同栖 =====
+   · 新应用：共读 / 批注 / 心声 / 问TA / 执笔成篇
+   · 当前已包含首页、书架、新建项目、阅读页、抽屉、写作表单和生成历史
+   · 页面内部使用 reading-page 栈，不堆叠大量 modal
+   · iOS/PWA 重点：
+     - 独立滚动区 reading-scroll
+     - translate3d 页面切换
+     - contain:layout paint
+     - -webkit-overflow-scrolling:touch
+*/
+
+/* ===== App Shell — 应用外壳 =====
+   · .reading-app 是 app-view 本体
+   · .reading-shell 内部 flex 纵向布局
+   · 不让页面内容溢出到小手机外
+*/
+.reading-app{
+  background:var(--bg-primary);
+}
+
+.reading-shell{
+  height:100%;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  contain:layout paint;
+}
+
+.reading-header{
+  flex:0 0 auto;
+}
+
+/* ===== Notice Overlay — 素页同栖制作中提示 =====
+   · 独立 overlay，不复用通用 modal
+   · iOS / PWA 下正文可滚动，按钮稳定可点
+*/
+.reading-notice-overlay{
+  position:absolute;
+  inset:0;
+  z-index:180;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  pointer-events:auto;
+  padding:20px 14px;
+  padding-top:max(20px,env(safe-area-inset-top,20px));
+  padding-bottom:max(20px,env(safe-area-inset-bottom,20px));
+  background:rgba(0,0,0,0.44);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.reading-notice-overlay.active{
+  display:flex;
+}
+
+.reading-notice-box{
+  width:100%;
+  max-width:330px;
+  max-height:min(78dvh,620px);
+  pointer-events:auto;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  border-radius:20px;
+  padding:20px 18px 18px;
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  box-shadow:0 18px 44px rgba(0,0,0,0.28);
+}
+
+.reading-notice-title{
+  font-size:16px;
+  font-weight:800;
+  color:var(--text-primary);
+  margin-bottom:10px;
+  text-align:center;
+}
+
+.reading-notice-body{
+  font-size:12px;
+  line-height:1.85;
+  color:var(--text-secondary);
+}
+
+.reading-notice-check{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin:14px 0 12px;
+  font-size:11px;
+  color:var(--text-muted);
+  cursor:pointer;
+}
+
+.reading-notice-check input{
+  accent-color:var(--accent);
+}
+
+.reading-notice-btn{
+  width:100%;
+  height:40px;
+  border:none;
+  border-radius:14px;
+  background:var(--accent);
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.reading-notice-btn:active{
+  transform:scale(0.985);
+}
+
+@supports not (height:100dvh){
+  .reading-notice-box{
+    max-height:min(78vh,620px);
+  }
+}
+
+/* ===== Page Stack — 内部页面栈 =====
+   · reading-pages 是内部页面容器
+   · reading-page 默认在右侧等待
+   · active 页进入可见区域
+   · back 页向左轻微退后，形成页面层级感
+*/
+.reading-pages{
+  position:relative;
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(124,111,155,0.10), transparent 34%),
+    linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
+}
+
+.reading-page{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  transform:translate3d(100%,0,0);
+  opacity:0;
+  pointer-events:none;
+  transition:transform .28s cubic-bezier(.4,0,.2,1), opacity .22s ease;
+  will-change:transform, opacity;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  contain:layout paint;
+}
+
+.reading-page.active{
+  transform:translate3d(0,0,0);
+  opacity:1;
+  pointer-events:auto;
+}
+
+.reading-page.back{
+  transform:translate3d(100%,0,0);
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ===== Scroll Area — 页面滚动区 =====
+   · 每个内部页面只让 reading-scroll 滚动
+   · 避免 iOS 弹性滚动串到外层 app-view
+   · 底部 padding 叠加 safe-area，避免内容被底部栏遮住
+*/
+.reading-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:16px;
+  padding-bottom:max(24px,calc(env(safe-area-inset-bottom,0px) + 24px));
+}
+
+/* ===== Home Hero — 首页标题区 =====
+   · 书页图标 + 应用标题 + 一句说明
+   · 只使用 SVG，不使用 emoji
+*/
+.reading-hero{
+  text-align:center;
+  padding:20px 10px 18px;
+}
+
+.reading-hero-icon{
+  width:64px;
+  height:64px;
+  margin:0 auto 12px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--accent);
+  background:rgba(124,111,155,0.12);
+  border:1px solid rgba(124,111,155,0.24);
+  box-shadow:0 10px 28px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.reading-hero-icon svg{
+  width:38px;
+  height:38px;
+}
+
+.reading-hero-title{
+  font-size:20px;
+  font-weight:800;
+  color:var(--text-primary);
+  letter-spacing:.5px;
+}
+
+.reading-hero-sub{
+  font-size:12px;
+  color:var(--text-muted);
+  line-height:1.7;
+  margin-top:6px;
+}
+
+/* ===== Entry Cards — 首页/功能入口卡片 =====
+   · 三个入口：品墨知音 / 阅趣同行 / 执笔成篇
+   · 卡片横向排布为：图标、标题说明、数量
+   · min-width:0 防止长文字撑开页面
+*/
+.reading-entry-grid{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.reading-entry-card{
+  width:100%;
+  min-width:0;
+  border:1px solid var(--border-soft);
+  border-radius:16px;
+  padding:14px;
+  background:rgba(255,255,255,0.045);
+  color:var(--text-primary);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:0 8px 22px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+  backdrop-filter:blur(18px) saturate(1.12);
+  -webkit-backdrop-filter:blur(18px) saturate(1.12);
+}
+
+html.light-mode .reading-entry-card{
+  background:rgba(255,255,255,0.52);
+  box-shadow:0 8px 22px rgba(60,48,80,0.07), inset 0 1px 0 rgba(255,255,255,0.55);
+}
+
+.reading-entry-card:active{
+  transform:scale(.985);
+  background:var(--bg-hover);
+}
+
+.reading-entry-icon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--accent);
+  background:rgba(124,111,155,0.12);
+  border:1px solid rgba(124,111,155,0.20);
+}
+
+.reading-entry-icon svg{
+  width:27px;
+  height:27px;
+}
+
+.reading-entry-main{
+  flex:1 1 auto;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.reading-entry-main strong{
+  font-size:15px;
+  color:var(--text-primary);
+  font-style:normal;
+}
+
+.reading-entry-main em{
+  font-size:11px;
+  color:var(--text-muted);
+  line-height:1.45;
+  font-style:normal;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.reading-entry-count{
+  flex:0 0 auto;
+  font-size:11px;
+  color:var(--accent);
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(124,111,155,0.10);
+  border:1px solid rgba(124,111,155,0.18);
+}
+
+/* ===== Section / List — 书架与占位列表 =====
+   · section-head 用于书架页顶部标题 + 新建按钮
+   · reading-list 放项目卡片
+   · reading-empty 显示空状态
+*/
+.reading-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.reading-section-title{
+  font-size:17px;
+  font-weight:800;
+  color:var(--text-primary);
+  margin-bottom:4px;
+}
+
+.reading-section-desc{
+  font-size:11px;
+  color:var(--text-muted);
+  line-height:1.5;
+}
+
+.reading-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.reading-empty{
+  display:none;
+  text-align:center;
+  padding:48px 20px;
+  color:var(--text-muted);
+  font-size:13px;
+  line-height:1.8;
+}
+
+/* ===== New Project — 新建共读表单 =====
+   · 角色选择卡片
+   · 文件导入 / 分段预览
+*/
+.reading-select-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  cursor:pointer;
+  min-width:0;
+}
+
+.reading-select-card:active{
+  background:var(--bg-hover);
+}
+
+.reading-select-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:var(--bg-tertiary);
+  border:1px solid var(--border);
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  flex:0 0 auto;
+  font-size:14px;
+}
+
+.reading-select-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.reading-select-main{
+  flex:1 1 auto;
+  min-width:0;
+}
+
+.reading-select-title{
+  font-size:14px;
+  font-weight:700;
+  color:var(--text-primary);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.reading-select-sub{
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:3px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.reading-select-arrow{
+  flex:0 0 auto;
+  color:var(--text-muted);
+  font-size:13px;
+}
+
+/* ===== Notice Cards — 提示与版权免责 =====
+   · reading-disclaimer 用于新建共读页版权/隐私提示
+   · placeholder-card 用于第一批占位说明
+*/
+.reading-placeholder-card,
+.reading-disclaimer{
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  padding:14px;
+  color:var(--text-secondary);
+  font-size:12px;
+  line-height:1.75;
+  margin-bottom:12px;
+}
+
+.reading-disclaimer{
+  background:rgba(196,92,92,0.08);
+  border-color:rgba(196,92,92,0.20);
+  color:var(--text-secondary);
+}
+
+/* ===== Reader Page — 阅读页 =====
+   · 阅读页不进入批注详情页
+   · 当前批注/心声/讨论下一批会在阅读页内浮签/抽屉展示
+*/
+.reading-reader{
+  height:100%;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.reading-reader-meta{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 16px;
+  background:var(--bg-secondary);
+  border-bottom:1px solid var(--border-soft);
+}
+
+.reading-reader-title{
+  font-size:14px;
+  font-weight:800;
+  color:var(--text-primary);
+  max-width:220px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.reading-reader-sub{
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:2px;
+}
+
+.reading-reader-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:14px 16px;
+  padding-bottom:92px;
+}
+
+.reading-paragraph{
+  position:relative;
+  background:rgba(255,255,255,0.035);
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  padding:14px 14px;
+  margin-bottom:12px;
+  color:var(--text-secondary);
+  font-size:14px;
+  line-height:1.85;
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+
+html.light-mode .reading-paragraph{
+  background:rgba(255,255,255,0.52);
+}
+
+.reading-paragraph.active{
+  border-color:rgba(124,111,155,0.55);
+  box-shadow:0 0 0 2px rgba(124,111,155,0.12);
+}
+
+.reading-paragraph-index{
+  font-size:10px;
+  color:var(--accent);
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.reading-reader-toolbar{
+  flex:0 0 auto;
+  display:flex;
+  gap:8px;
+  padding:10px 12px;
+  padding-bottom:max(10px,env(safe-area-inset-bottom,10px));
+  background:var(--bg-secondary);
+  border-top:1px solid var(--border-soft);
+}
+
+.reading-reader-toolbar .btn-sm{
+  flex:1;
+}
+
+/* ===== Annotation Cards — 批注浮签 =====
+   · 批注不进入独立页面
+   · 显示在段落下方，像书页边缘浮签
+   · 多条批注横向滑动
+*/
+.reading-annotation-strip{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  margin-top:10px;
+  padding-bottom:2px;
+}
+
+.reading-annotation-strip::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
+}
+
+.reading-annotation-card{
+  flex:0 0 min(260px,82%);
+  background:rgba(124,111,155,0.10);
+  border:1px solid rgba(124,111,155,0.22);
+  border-left:3px solid var(--accent);
+  border-radius:12px;
+  padding:10px 12px;
+  color:var(--text-secondary);
+  font-size:12px;
+  line-height:1.65;
+  cursor:pointer;
+}
+
+.reading-annotation-card:active{
+  background:rgba(124,111,155,0.16);
+}
+
+.reading-annotation-meta{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:10px;
+  color:var(--accent);
+  margin-bottom:5px;
+  font-weight:700;
+}
+
+.reading-annotation-note{
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+/* ===== Drawer — 阅读页底部抽屉 =====
+   · 心声 / 问TA / 批注详情都在阅读页内显示
+   · 不进入新页面，不改变阅读滚动位置
+   · iOS 下 body 独立滚动，footer 保持可点
+*/
+.reading-drawer-overlay{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:flex-end;
+  background:rgba(0,0,0,0.38);
+  z-index:30;
+}
+
+.reading-drawer-overlay.active{
+  display:flex;
+}
+
+.reading-drawer{
+  width:100%;
+  max-height:min(72dvh,620px);
+  min-height:220px;
+  background:var(--bg-secondary);
+  border:1px solid var(--border-soft);
+  border-bottom:none;
+  border-radius:18px 18px 0 0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 -12px 36px rgba(0,0,0,0.24);
+  animation:readingDrawerUp .22s ease;
+}
+
+@keyframes readingDrawerUp{
+  from{transform:translate3d(0,100%,0)}
+  to{transform:translate3d(0,0,0)}
+}
+
+.reading-drawer-header{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px 10px;
+  border-bottom:1px solid var(--border-soft);
+}
+
+.reading-drawer-title{
+  font-size:14px;
+  font-weight:800;
+  color:var(--text-primary);
+}
+
+.reading-drawer-sub{
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:2px;
+}
+
+.reading-drawer-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:14px 16px;
+}
+
+.reading-drawer-footer{
+  flex:0 0 auto;
+  display:flex;
+  gap:8px;
+  padding:10px 16px;
+  padding-bottom:max(12px,env(safe-area-inset-bottom,12px));
+  border-top:1px solid var(--border-soft);
+}
+
+.reading-drawer-footer:empty{
+  display:none;
+}
+
+.reading-drawer-section{
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:10px;
+}
+
+.reading-drawer-section-title{
+  font-size:11px;
+  color:var(--text-muted);
+  margin-bottom:6px;
+}
+
+.reading-drawer-text{
+  font-size:13px;
+  color:var(--text-secondary);
+  line-height:1.75;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.reading-discussion-item{
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:10px;
+}
+
+.reading-discussion-q{
+  font-size:12px;
+  color:var(--accent);
+  line-height:1.6;
+  margin-bottom:6px;
+  white-space:pre-wrap;
+}
+
+.reading-discussion-a{
+  font-size:13px;
+  color:var(--text-secondary);
+  line-height:1.75;
+  white-space:pre-wrap;
+}
+
+/* ===== Generating State — 生成中视觉 =====
+   · 只影响素页同栖内部按钮
+   · JS 会在生成期间给 readingApp 加 .reading-generating
+*/
+#readingApp.reading-generating .reading-reader-toolbar button,
+#readingApp.reading-generating .reading-drawer-footer button,
+#readingApp.reading-generating .reading-page[data-reading-page="writeForm"] .btn.primary{
+  opacity:.55;
+}
+
+#readingApp.reading-generating .reading-reader-toolbar button,
+#readingApp.reading-generating .reading-drawer-footer button{
+  cursor:wait;
+  pointer-events:none;
+}
+
+/* ===== Writing Result — 执笔成篇结果 =====
+   · 长文结果允许用户手动选中复制
+   · 保留自然换行
+   · 防止长英文/URL/代码片段撑宽页面
+*/
+#readingWriteResultContent{
+  -webkit-user-select:text;
+  user-select:text;
+  cursor:text;
+  white-space:pre-wrap!important;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  max-width:100%;
+}
+
+/* ===== iOS / PWA — 苹果设备兼容 =====
+   · translateZ(0) 减少页面切换残影
+   · PWA standalone 下使用主文件写入的真实高度变量
+   · 只影响 readingApp，不影响其他 App
+*/
+html.ios-device .reading-shell{
+  transform:translateZ(0);
+}
+
+html.ios-device .reading-page{
+  -webkit-transform:translate3d(100%,0,0);
+  transform:translate3d(100%,0,0);
+  opacity:0;
+  pointer-events:none;
+}
+
+html.ios-device .reading-page.active{
+  -webkit-transform:translate3d(0,0,0);
+  transform:translate3d(0,0,0);
+  opacity:1;
+  pointer-events:auto;
+}
+
+html.ios-device #readingApp{
+  height:var(--cbyd21-ios-pwa-vh,100dvh);
+  max-height:var(--cbyd21-ios-pwa-vh,100dvh);
+}

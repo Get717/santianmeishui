@@ -1,0 +1,371 @@
+/* ===== cbyd21_Search — 分层搜索页面 ===== */
+
+/* 搜索页滑入稳定层
+   · 使用 translate3d 让 iOS/PWA 下页面切换更稳定
+   · backface-visibility 减少返回时闪白和残影 */
+#searchNavPage,
+#searchResultPage{
+  transform:translate3d(100%,0,0);
+  -webkit-transform:translate3d(100%,0,0);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  contain:layout paint;
+}
+
+#searchNavPage.active,
+#searchResultPage.active{
+  transform:translate3d(0,0,0);
+  -webkit-transform:translate3d(0,0,0);
+}
+
+/* 搜索导航页滚动区
+   · 用于分支列表、线下次数列表、存档列表、时间线列表
+   · iOS 下开启 -webkit-overflow-scrolling，保证滚动顺滑 */
+.sf-search-page-scroll{
+  flex:1;
+  min-height:0;
+  padding:16px;
+  padding-bottom:max(24px,calc(env(safe-area-inset-bottom,0px) + 18px));
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  touch-action:pan-y;
+}
+
+/* 搜索分层列表
+   · 所有搜索层级都用竖向条目，不使用 tab
+   · 点击条目进入下一层页面 */
+.sf-nav-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* 搜索导航条目
+   · 用于分支、通话记录、线下次数、存档、浮生时间线等入口 */
+.sf-nav-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 13px;
+  border-radius:14px;
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  cursor:pointer;
+  transition:background .15s,transform .15s,border-color .15s;
+  min-width:0;
+}
+
+.sf-nav-item:active{
+  transform:scale(.985);
+  background:var(--bg-hover);
+}
+
+.sf-nav-icon{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  color:var(--accent);
+  background:rgba(124,111,155,.10);
+  border:1px solid rgba(124,111,155,.18);
+  font-size:17px;
+}
+
+.sf-nav-icon svg,
+.sf-empty-icon svg,
+.char-info-item-icon svg{
+  width:18px;
+  height:18px;
+  display:block;
+  margin:0 auto;
+  stroke:currentColor;
+  flex-shrink:0;
+}
+
+.sf-nav-main{
+  flex:1;
+  min-width:0;
+}
+
+.sf-nav-title{
+  font-size:14px;
+  color:var(--text-primary);
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sf-nav-sub{
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:4px;
+  line-height:1.45;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sf-nav-count{
+  font-size:11px;
+  color:var(--accent);
+  flex-shrink:0;
+  max-width:76px;
+  text-align:right;
+  white-space:nowrap;
+}
+
+/* 搜索空状态
+   · 当前层级没有记录或关键词没有命中时显示 */
+.sf-empty{
+  text-align:center;
+  color:var(--text-muted);
+  font-size:13px;
+  line-height:1.8;
+  padding:46px 20px;
+}
+
+.sf-empty-icon{
+  font-size:34px;
+  opacity:.45;
+  margin-bottom:10px;
+}
+
+.sf-breadcrumb{
+  font-size:11px;
+  color:var(--text-muted);
+  line-height:1.6;
+  padding:0 2px 12px;
+}
+
+/* 最终搜索页结构
+   · 顶部搜索框
+   · 中间日期筛选条
+   · 下方结果列表 */
+.sf-result-shell{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  background:var(--bg-primary);
+}
+
+/* 搜索输入区
+   · 固定在最终搜索页上方
+   · 用户输入关键词后实时过滤当前范围内的历史记录 */
+.sf-search-box{
+  flex-shrink:0;
+  display:flex;
+  gap:8px;
+  padding:12px 16px 10px;
+  border-bottom:1px solid var(--border-soft);
+  background:var(--bg-secondary);
+}
+
+.sf-search-input{
+  flex:1;
+  min-width:0;
+  height:38px;
+  padding:0 13px;
+  border-radius:19px;
+  border:1px solid var(--border);
+  background:var(--bg-input);
+  color:var(--text-primary);
+  font-size:13px;
+  outline:none;
+  font-family:inherit;
+}
+
+.sf-search-input:focus{
+  border-color:var(--accent-soft);
+}
+
+.sf-search-clear{
+  flex-shrink:0;
+  padding:0 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--bg-tertiary);
+  color:var(--text-secondary);
+  font-size:12px;
+  font-family:inherit;
+  cursor:pointer;
+}
+
+/* 日期筛选条
+   · 按现实日期分组历史消息
+   · 横向滚动，点击日期查看当天记录 */
+.sf-date-strip{
+  flex-shrink:0;
+  display:flex;
+  gap:7px;
+  padding:10px 16px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  border-bottom:1px solid var(--border-soft);
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  scrollbar-width:none;
+  background:var(--bg-primary);
+}
+
+.sf-date-strip::-webkit-scrollbar{
+  display:none;
+}
+
+.sf-date-pill{
+  flex-shrink:0;
+  padding:7px 11px;
+  border-radius:999px;
+  border:1px solid var(--border-soft);
+  background:var(--bg-card);
+  color:var(--text-muted);
+  font-size:11px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.sf-date-pill.active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+
+/* 搜索结果列表
+   · 展示当前关键词和日期筛选后的记录
+   · 每条结果支持收藏、复制、查看来源 */
+.sf-result-list{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  padding:14px 16px max(34px,calc(env(safe-area-inset-bottom,0px) + 24px));
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+
+/* 搜索结果卡片
+   · 显示发送者、来源、命中内容和操作按钮 */
+.sf-result-card{
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  padding:12px 13px;
+  margin-bottom:10px;
+  overflow:hidden;
+}
+
+.sf-result-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:7px;
+}
+
+.sf-speaker{
+  font-size:12px;
+  font-weight:600;
+  color:var(--accent);
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.sf-source{
+  font-size:10px;
+  color:var(--text-muted);
+  margin-left:auto;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+
+.sf-content{
+  font-size:13px;
+  color:var(--text-secondary);
+  line-height:1.7;
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  max-height:220px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+
+/* 关键词高亮
+   · 搜索结果中命中的文字片段会用这个样式标出 */
+.sf-highlight{
+  color:var(--text-primary);
+  background:rgba(124,111,155,.28);
+  border-radius:4px;
+  padding:0 2px;
+}
+
+.sf-actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+
+.sf-action{
+  border:1px solid var(--border);
+  background:var(--bg-tertiary);
+  color:var(--text-secondary);
+  border-radius:9px;
+  padding:7px 10px;
+  font-size:11px;
+  cursor:pointer;
+  font-family:inherit;
+}
+
+.sf-action.primary{
+  color:#fff;
+  background:var(--accent);
+  border-color:var(--accent);
+}
+
+.sf-action.danger{
+  color:var(--danger);
+  border-color:rgba(196,92,92,.35);
+  background:rgba(196,92,92,.08);
+}
+
+/* iOS / PWA 高度兜底
+   · 复用主文件写入的 --cbyd21-ios-pwa-vh
+   · 防止搜索页在 iOS 添加到主屏幕后底部被裁切或高度闪动 */
+html.ios-device.ios-pwa-standalone #searchNavPage,
+html.ios-device.ios-pwa-standalone #searchResultPage{
+  height:var(--cbyd21-ios-pwa-vh,100dvh)!important;
+  min-height:var(--cbyd21-ios-pwa-vh,100dvh)!important;
+  max-height:var(--cbyd21-ios-pwa-vh,100dvh)!important;
+}
+
+:fullscreen #searchNavPage .app-header,
+:-webkit-full-screen #searchNavPage .app-header,
+:fullscreen #searchResultPage .app-header,
+:-webkit-full-screen #searchResultPage .app-header{
+  padding-top:44px!important;
+}
+
+body.statusbar-hidden #searchNavPage .app-header,
+body.statusbar-hidden #searchResultPage .app-header{
+  padding-top:max(10px,calc(env(safe-area-inset-top,0px) + 20px));
+}
+
+body.statusbar-hidden:fullscreen #searchNavPage .app-header,
+:fullscreen body.statusbar-hidden #searchNavPage .app-header,
+body.statusbar-hidden:fullscreen #searchResultPage .app-header,
+:fullscreen body.statusbar-hidden #searchResultPage .app-header{
+  padding-top:24px!important;
+}

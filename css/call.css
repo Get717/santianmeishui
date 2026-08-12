@@ -1,0 +1,152 @@
+/* ============================================================
+   cbyd21_Call CSS — 通话界面样式
+   从主文件拆分，包含：
+   · 通话全屏覆盖层（响铃/通话中/已结束三状态）
+   · 通话消息气泡
+   · 通话输入区
+   · 通话操作按钮（接听/挂断/缩小/静音）
+   · 缩小悬浮球
+   · 视频通话（背景立绘+画中画）
+   · 打字指示器
+   ============================================================ */
+
+/* === 通话全屏覆盖层 ===
+   · z-index:600 高于所有弹窗
+   · 默认 display:none，.active 时显示
+   · 渐变背景，日间/夜间各一套
+*/
+.call-overlay{position:fixed;inset:0;z-index:600;background:linear-gradient(180deg,#1a1528 0%,#0d0d14 100%);display:none;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.3s;overflow:hidden}
+.call-overlay.active{display:flex}
+html.light-mode .call-overlay{background:linear-gradient(180deg,#FFFFFF 0%,#F4F6F9 100%)}
+
+/* === 通话头像 ===
+   · 96px 圆形，呼叫中有脉冲动画
+   · 接通后动画停止，改为静态光晕
+*/
+.call-avatar{width:96px;height:96px;border-radius:50%;background:var(--bg-tertiary);border:3px solid rgba(124,111,155,0.3);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--accent);overflow:hidden;margin-bottom:16px;animation:callPulse 2s ease-in-out infinite}
+.call-avatar img{width:100%;height:100%;object-fit:cover}
+
+/* 脉冲动画：呼叫中头像周围的波纹效果 */
+@keyframes callPulse{0%,100%{box-shadow:0 0 0 0 rgba(124,111,155,0.3)}50%{box-shadow:0 0 0 20px rgba(124,111,155,0)}}
+
+/* 接通状态：停止脉冲，显示静态光晕 */
+.call-connected .call-avatar{animation:none;box-shadow:0 0 20px rgba(124,111,155,0.15)}
+
+/* === 通话信息文字 ===
+   · .call-name → 角色名（22px加粗）
+   · .call-status → 状态文字（正在呼叫/通话中/已结束）
+   · .call-timer → 通话计时器（28px等宽数字）
+*/
+.call-name{font-size:22px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.call-status{font-size:13px;color:var(--text-muted);margin-bottom:40px;min-height:20px}
+.call-timer{font-size:28px;font-weight:300;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:2px;margin-bottom:24px}
+
+/* === 通话消息区 ===
+   · 接通后才显示（.call-connected .call-messages）
+   · 最大高度40vh，超出可滚动
+   · 消息气泡分用户（右对齐）和AI（左对齐）
+*/
+.call-messages{flex:1;width:100%;max-width:360px;overflow-y:auto;padding:16px;display:none;flex-direction:column;gap:10px;margin-bottom:12px;max-height:40vh}
+.call-connected .call-messages{display:flex}
+
+/* 通话消息气泡 */
+.call-msg{padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;max-width:85%;animation:msgIn 0.3s ease;white-space:pre-wrap}
+/* 用户消息：右对齐，右上角尖角 */
+.call-msg.user{align-self:flex-end;background:var(--msg-user-bg);border:1px solid var(--border-soft);border-top-right-radius:4px;color:var(--text-primary)}
+/* AI消息：左对齐，左上角尖角 */
+.call-msg.ai{align-self:flex-start;background:var(--msg-ai-bg);border:1px solid var(--border-soft);border-top-left-radius:4px;color:var(--text-primary)}
+
+/* === 通话输入区 ===
+   · 接通后才显示
+   · 输入框圆角22px + 圆形发送按钮
+*/
+.call-input-area{width:100%;max-width:360px;padding:0 16px;display:none}
+.call-connected .call-input-area{display:block}
+.call-input-row{display:flex;gap:8px;align-items:center}
+.call-trigger-btn{width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,0.08);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+.call-trigger-btn:active{transform:scale(0.9);background:rgba(124,111,155,0.2);color:var(--accent)}
+html.light-mode .call-trigger-btn{background:rgba(0,0,0,0.04)}
+.video-mode .call-trigger-btn{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)}
+.call-input-row input{flex:1;padding:10px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:22px;color:var(--text-primary);font-size:14px;outline:none}
+html.light-mode .call-input-row input{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.1)}
+.call-input-row input::placeholder{color:var(--text-muted)}
+.call-input-row button{width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* === 通话操作按钮 ===
+   · .call-btn → 60px圆形按钮基础样式
+   · .call-btn-accept → 接听（绿色）
+   · .call-btn-end → 挂断（红色）
+   · .call-btn-func → 功能按钮（缩小/静音，半透明）
+*/
+.call-actions{display:flex;gap:24px;margin-top:32px}
+.call-btn{width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform 0.15s,opacity 0.15s}
+.call-btn:active{transform:scale(0.9)}
+.call-btn-label{font-size:10px;margin-top:4px}
+.call-btn-accept{background:#4CAF50;color:#fff}
+.call-btn-end{background:#e74c3c;color:#fff}
+.call-btn-func{background:rgba(255,255,255,0.1);color:var(--text-secondary)}
+html.light-mode .call-btn-func{background:rgba(0,0,0,0.06)}
+
+/* === 通话结束状态 ===
+   · 头像变半透明，操作栏上移
+*/
+.call-ended .call-avatar{animation:none;opacity:0.6}
+.call-ended .call-actions{margin-top:24px}
+
+/* === 通话打字指示器 ===
+   · AI正在回复时显示三个跳动圆点
+   · 复用主文件的 typing 动画关键帧
+*/
+.call-typing{padding:4px 16px;display:none}
+.call-typing.active{display:block}
+.call-typing-dots{display:inline-flex;gap:4px;padding:10px 16px;background:var(--msg-ai-bg);border:1px solid var(--border-soft);border-radius:14px;border-top-left-radius:4px;animation:msgIn 0.3s ease}
+.call-typing-dots span{width:6px;height:6px;background:var(--text-muted);border-radius:50%;animation:typing 1.2s infinite}
+.call-typing-dots span:nth-child(2){animation-delay:0.2s}
+.call-typing-dots span:nth-child(3){animation-delay:0.4s}
+
+/* === 通话缩小悬浮球 ===
+   · 通话中点缩小→全屏隐藏，悬浮球出现
+   · 点击悬浮球→恢复全屏
+   · 球上显示通话计时
+   · z-index:500（低于通话全屏600）
+*/
+.call-mini{position:absolute;bottom:100px;right:16px;width:56px;height:56px;border-radius:50%;background:rgba(124,111,155,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:2px solid rgba(255,255,255,0.15);z-index:2;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.3);animation:callPulse 2s ease-in-out infinite;pointer-events:auto}
+.call-mini.active{display:flex;touch-action:none}
+/* 悬浮球底部计时器标签 */
+.call-mini-timer{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1px 6px;font-size:9px;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* === 视频通话模式 ===
+   · 背景变纯黑
+   · 头像隐藏，名字/状态/计时器绝对定位到顶部
+   · .call-video-bg → 全屏角色立绘（背景层）
+   · .call-video-pip → 右上角用户画中画小窗（90x120px）
+   · 消息区/输入区/按钮区加 z-index 确保在立绘之上
+*/
+.call-overlay.video-mode{background:#000}
+.call-overlay.video-mode .call-avatar{display:none}
+.call-overlay.video-mode .call-name{position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:3;text-shadow:0 1px 6px rgba(0,0,0,0.6)}
+.call-overlay.video-mode .call-status{position:absolute;top:88px;left:50%;transform:translateX(-50%);z-index:3;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+.call-overlay.video-mode .call-timer{position:absolute;top:108px;left:50%;transform:translateX(-50%);z-index:3;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+
+/* 视频通话背景层（角色立绘） */
+.call-video-bg{position:absolute;inset:0;background:var(--bg-tertiary);display:none;z-index:0}
+.call-video-bg img{width:100%;height:100%;object-fit:cover}
+.video-mode .call-video-bg{display:block}
+
+/* 视频通话画中画（用户形象） */
+.call-video-pip{position:absolute;top:50px;right:16px;width:90px;height:120px;border-radius:12px;background:var(--bg-tertiary);border:2px solid rgba(255,255,255,0.15);overflow:hidden;z-index:4;display:none;box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+.call-video-pip img{width:100%;height:100%;object-fit:cover}
+.video-mode .call-video-pip{display:flex;align-items:center;justify-content:center}
+
+/* 视频模式下消息区/输入区/按钮区的层级和样式 */
+.call-chat-area{display:flex;flex-direction:column;width:100%;max-width:360px;z-index:2;position:relative}
+.video-mode .call-chat-area{background:rgba(0,0,0,0.18);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;margin:0 8px;overflow:hidden}
+.video-mode .call-messages{background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;margin:0;max-height:30vh;padding-bottom:0;border-bottom:none}
+.video-mode .call-input-area{z-index:2;position:relative;background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;padding:10px 12px 12px;margin:0;border-top:1px solid rgba(255,255,255,0.06)}
+.video-mode .call-input-row input{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#ffffff}
+.video-mode .call-input-row input::placeholder{color:rgba(255,255,255,0.3)}
+.video-mode .call-msg.ai{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.08)}
+.video-mode .call-msg.user{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.1)}
+.video-mode .call-actions{z-index:2;position:relative}
+.video-mode .call-typing{background:none;padding:4px 16px}
+.video-mode .call-typing .call-typing-dots{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.08)}

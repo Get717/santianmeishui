@@ -1,0 +1,102 @@
+/* ===== 皮下模式 =====
+   用户侧显示名：皮下模式
+   内部数据字段暂时沿用 _oocMode / _oocInstructions，减少迁移风险
+*/
+
+/* 顶栏下方状态条：类似微信位置共享条，不挡输入框 */
+.under-mode-top-bar{
+  display:none;
+  align-items:center;
+  gap:8px;
+  padding:7px 16px;
+  background:var(--bg-secondary);
+  border-bottom:1px solid var(--border-soft);
+  color:var(--text-secondary);
+  font-size:11px;
+  line-height:1.4;
+  flex-shrink:0;
+  z-index:9;
+}
+
+.under-mode-top-bar.active{
+  display:flex;
+}
+
+.under-mode-top-title{
+  color:var(--accent);
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.under-mode-top-desc{
+  color:var(--text-muted);
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.under-mode-top-actions{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:0;
+}
+
+.under-mode-top-action{
+  border:none;
+  background:transparent;
+  color:var(--text-muted);
+  font-size:11px;
+  line-height:1.4;
+  padding:2px 3px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.under-mode-top-action:active{
+  background:rgba(124,111,155,0.14);
+  color:var(--text-primary);
+}
+
+.under-mode-code{
+  font-family:'SF Mono','Fira Code',monospace;
+  font-size:11px;
+  padding:1px 5px;
+  border-radius:5px;
+  color:var(--accent);
+  background:rgba(124,111,155,0.10);
+  border:1px solid rgba(124,111,155,0.18);
+}
+
+.under-mode-requirement-card{
+  background:var(--bg-tertiary);
+  border:1px solid var(--border-soft);
+  border-radius:10px;
+  padding:10px 12px;
+  margin-bottom:8px;
+}
+
+.under-mode-requirement-row{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.under-mode-requirement-index{
+  font-size:12px;
+  color:var(--accent);
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.under-mode-requirement-content{
+  flex:1;
+  min-width:0;
+  white-space:pre-wrap;
+  word-break:break-word;
+  color:var(--text-secondary);
+  font-size:13px;
+  line-height:1.7;
+}

@@ -1,0 +1,587 @@
+/* ===== 【模块】cbyd21_Games — 绘言戏局样式 =====
+   这个文件只管“绘言戏局”的外壳界面。
+   它负责：冰晶白背景、星星底纹、悬浮画框、左右切换按钮、页码点。
+   具体文游本体的样式不要写在这里，比如浮生逆笔继续放在 fate.css。
+*/
+
+/* 页面整体
+   · 这里是绘言戏局 APP 的内容区
+   · 顶栏仍然使用主文件里的 .app-header，不在这里重做
+*/
+.games-page{
+  flex:1;
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  background:#e3e4ed;
+}
+
+/* 一层很淡的雾白罩子
+   · 作用是让底色更干净
+   · 透明度太高会廉价发蓝，所以这里只盖很淡
+*/
+.games-page::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:rgba(255,255,255,0.14);
+  z-index:0;
+}
+
+/* 背景星星底纹
+   · 这里不是随机散点
+   · 是像壁纸底纹一样斜向右下重复排列
+   · 星星颜色是冷白偏紫，不用黑灰
+*/
+.games-star-field{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:1;
+}
+
+/* 第一层：主星星 */
+.games-star-field::before{
+  content:"";
+  position:absolute;
+  inset:-80px;
+  opacity:0.66;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='132' height='132' viewBox='0 0 132 132' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fbfaff' opacity='0.86'%3E%3Cpath d='M14 14l3.1 6.3h7l-5.7 4.1 2.2 6.8L14 27 7.4 31.2l2.2-6.8-5.7-4.1h7z'/%3E%3Cpath d='M42 38l3.2 6.5h7.2l-5.8 4.2 2.2 7L42 51.4l-6.8 4.3 2.2-7-5.8-4.2h7.2z'/%3E%3Cpath d='M70 62l3.4 6.8h7.5l-6.1 4.4 2.3 7.2L70 75.9l-7.1 4.5 2.3-7.2-6.1-4.4h7.5z'/%3E%3Cpath d='M98 86l3.2 6.5h7.2l-5.8 4.2 2.2 7L98 99.4l-6.8 4.3 2.2-7-5.8-4.2h7.2z'/%3E%3Cpath d='M126 110l2.8 5.6h6.2l-5 3.7 1.9 5.9-5.9-3.7-5.9 3.7 1.9-5.9-5-3.7h6.2z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:132px 132px;
+  background-repeat:repeat;
+}
+
+/* 第二层：小星星补空 */
+.games-star-field::after{
+  content:"";
+  position:absolute;
+  inset:-80px;
+  opacity:0.48;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='132' height='132' viewBox='0 0 132 132' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f8f6ff' opacity='0.78'%3E%3Cpath d='M48 12l2.2 4.5h5l-4 2.9 1.5 4.8-4.7-3-4.7 3 1.5-4.8-4-2.9h5z'/%3E%3Cpath d='M76 36l2.4 4.9h5.4l-4.4 3.2 1.7 5.2-5.1-3.2-5.1 3.2 1.7-5.2-4.4-3.2h5.4z'/%3E%3Cpath d='M104 60l2.2 4.5h5l-4 2.9 1.5 4.8-4.7-3-4.7 3 1.5-4.8-4-2.9h5z'/%3E%3Cpath d='M20 60l2.3 4.7h5.2l-4.2 3.1 1.6 5-4.9-3.1-4.9 3.1 1.6-5-4.2-3.1h5.2z'/%3E%3Cpath d='M48 84l2.2 4.5h5l-4 2.9 1.5 4.8-4.7-3-4.7 3 1.5-4.8-4-2.9h5z'/%3E%3Cpath d='M76 108l2.1 4.3h4.8l-3.9 2.8 1.5 4.6-4.5-2.8-4.5 2.8 1.5-4.6-3.9-2.8h4.8z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:132px 132px;
+  background-repeat:repeat;
+  transform:translate(24px,18px);
+}
+
+/* 内容容器
+   · 放提示卡、画框、按钮
+   · z-index 比星星高
+*/
+.games-content{
+  position:relative;
+  z-index:2;
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:14px 16px 22px;
+}
+
+/* 通用玻璃卡
+   · 提示卡会用到
+   · 白色透明磨砂，参考桌面图标的质感
+*/
+.games-glass-card{
+  background:rgba(255,255,255,0.36);
+  border:1px solid rgba(255,255,255,0.70);
+  backdrop-filter:blur(30px) saturate(1.18);
+  -webkit-backdrop-filter:blur(30px) saturate(1.18);
+  box-shadow:
+    0 10px 28px rgba(118,120,150,0.11),
+    inset 0 1px 0 rgba(255,255,255,0.68),
+    inset 0 -1px 0 rgba(255,255,255,0.18);
+}
+
+/* 顶部提示卡
+   · 替代旧版“悬框剧场”大标题
+   · 更贴近原前端的卡片式布局
+*/
+.games-note{
+  width:100%;
+  max-width:360px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 13px;
+  margin-bottom:8px;
+  border-radius:15px;
+}
+
+.games-note-left{
+  min-width:0;
+}
+
+.games-note-title{
+  font-size:13px;
+  font-weight:650;
+  color:rgba(80,86,102,0.82);
+  letter-spacing:0.4px;
+}
+
+.games-note-sub{
+  margin-top:3px;
+  font-size:11px;
+  color:rgba(84,90,106,0.44);
+  line-height:1.45;
+}
+
+.games-note-count{
+  flex-shrink:0;
+  min-width:44px;
+  height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  color:rgba(84,90,106,0.58);
+  background:rgba(255,255,255,0.28);
+  border:1px solid rgba(255,255,255,0.62);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.44);
+}
+
+/* 画框舞台
+   · 画框都在这个区域里悬浮
+   · perspective 控制 3D 透视感
+*/
+.games-frame-stage{
+  width:100%;
+  max-width:390px;
+  flex:1;
+  min-height:390px;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  perspective:1450px;
+  overflow:visible;
+  margin-top:-4px;
+}
+
+/* 画框底部阴影 */
+.games-stage-shadow{
+  position:absolute;
+  left:50%;
+  bottom:44px;
+  width:72%;
+  height:38px;
+  transform:translateX(-50%);
+  background:rgba(118,120,150,0.16);
+  filter:blur(18px);
+  border-radius:50%;
+  opacity:0.62;
+  pointer-events:none;
+}
+
+/* 画框轨道
+   · JS 会在这里创建每一个画框
+   · touch-action:pan-y 是为了让左右滑由我们自己处理，上下滑仍然交给浏览器
+*/
+.games-frame-track{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  touch-action:pan-y;
+}
+
+/* 单个画框
+   · JS 会直接给它写 transform / opacity / filter
+   · 不再用 active/prev/next 类做死切换，所以动画更丝滑
+*/
+.games-frame-card{
+  position:absolute;
+  width:min(78vw,292px);
+  height:min(50vh,392px);
+  min-height:336px;
+  max-height:406px;
+  transform-style:preserve-3d;
+  opacity:0;
+  pointer-events:none;
+  will-change:transform,opacity,filter;
+  transition:
+    transform 0.72s cubic-bezier(0.16,1,0.28,1),
+    opacity 0.52s ease,
+    filter 0.52s ease;
+}
+
+/* 正在拖动时取消过渡，让画框跟着手走 */
+.games-frame-track.dragging .games-frame-card{
+  transition:none;
+}
+
+/* 当前画框和左右相邻画框可以点击 */
+.games-frame-card.is-clickable{
+  pointer-events:auto;
+}
+
+/* 画框最外层
+   · 方形边角，更像真正放画的框
+   · 不是圆角卡片
+*/
+.games-frame-outer{
+  position:absolute;
+  inset:0;
+  padding:18px;
+  border-radius:7px;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,0.68),rgba(255,255,255,0.24)),
+    rgba(255,255,255,0.30);
+  border:1px solid rgba(255,255,255,0.78);
+  backdrop-filter:blur(34px) saturate(1.18);
+  -webkit-backdrop-filter:blur(34px) saturate(1.18);
+  box-shadow:
+    0 24px 58px rgba(118,120,150,0.15),
+    0 7px 18px rgba(118,120,150,0.09),
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    inset 0 -1px 0 rgba(255,255,255,0.16);
+}
+
+/* 画框内压线 */
+.games-frame-outer::before{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border-radius:3px;
+  border:1px solid rgba(255,255,255,0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(150,170,190,0.05),
+    inset 0 14px 20px rgba(255,255,255,0.24),
+    inset 0 -18px 24px rgba(150,170,190,0.06);
+  pointer-events:none;
+}
+
+/* 画框角落高光 */
+.games-frame-outer::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:8px;
+  pointer-events:none;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,0.42),transparent 25%),
+    linear-gradient(315deg,rgba(255,255,255,0.16),transparent 26%);
+  opacity:0.72;
+}
+
+/* 装裱底板 */
+.games-frame-mat{
+  position:relative;
+  width:100%;
+  height:100%;
+  padding:13px;
+  border-radius:3px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,0.42),rgba(255,255,255,0.18)),
+    rgba(255,255,255,0.22);
+  border:1px solid rgba(255,255,255,0.52);
+  backdrop-filter:blur(22px) saturate(1.10);
+  -webkit-backdrop-filter:blur(22px) saturate(1.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.52),
+    inset 0 0 24px rgba(255,255,255,0.14),
+    0 0 0 1px rgba(150,170,190,0.04);
+  overflow:hidden;
+}
+
+/* 真正的画芯区域 */
+.games-frame-inner{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  border-radius:2px;
+  background:rgba(255,255,255,0.18);
+  border:1px solid rgba(255,255,255,0.40);
+  backdrop-filter:blur(18px) saturate(1.08);
+  -webkit-backdrop-filter:blur(18px) saturate(1.08);
+  box-shadow:
+    inset 0 0 0 1px rgba(150,170,190,0.05),
+    inset 0 20px 50px rgba(255,255,255,0.12);
+}
+
+/* 封面底色 */
+.games-frame-cover{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+}
+
+.games-frame-cover::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(120deg,rgba(255,255,255,0.40),transparent 34%),
+    rgba(255,255,255,0.08);
+  pointer-events:none;
+}
+
+/* 浮生逆笔封面占位 */
+.games-cover-fate{
+  background:
+    radial-gradient(circle at 50% 26%,rgba(255,255,255,0.86),transparent 18%),
+    radial-gradient(circle at 40% 38%,rgba(225,235,245,0.58),transparent 30%),
+    radial-gradient(circle at 72% 68%,rgba(255,255,255,0.52),transparent 32%),
+    rgba(235,242,247,0.35);
+}
+
+/* 万象匣封面占位
+   · 前端承载器 / 小浏览器感觉
+   · 仍然保持绘言戏局的冰晶白玻璃风格
+*/
+.games-cover-simulator{
+  background:
+    radial-gradient(circle at 50% 28%,rgba(255,255,255,0.82),transparent 20%),
+    radial-gradient(circle at 34% 58%,rgba(220,232,246,0.54),transparent 34%),
+    radial-gradient(circle at 76% 64%,rgba(238,230,255,0.46),transparent 30%),
+    linear-gradient(145deg,rgba(244,248,255,0.44),rgba(224,231,244,0.24));
+}
+
+/* 未开放封面占位 */
+.games-cover-coming{
+  background:
+    radial-gradient(circle at 50% 32%,rgba(255,255,255,0.68),transparent 24%),
+    rgba(235,242,247,0.28);
+}
+
+/* 封面线稿 */
+.games-frame-art{
+  position:absolute;
+  left:50%;
+  top:34%;
+  width:122px;
+  height:122px;
+  transform:translate(-50%,-50%);
+  color:rgba(98,106,124,0.42);
+  filter:drop-shadow(0 8px 18px rgba(118,120,150,0.09));
+  opacity:0.95;
+}
+
+/* 画框编号 */
+.games-frame-index{
+  position:absolute;
+  left:14px;
+  top:14px;
+  z-index:2;
+  font-size:10px;
+  letter-spacing:1.8px;
+  color:rgba(98,106,124,0.34);
+}
+
+/* 画框文字区 */
+.games-frame-info{
+  position:absolute;
+  left:17px;
+  right:17px;
+  bottom:17px;
+  z-index:2;
+}
+
+.games-frame-kicker{
+  font-size:9px;
+  letter-spacing:2.2px;
+  color:rgba(98,106,124,0.36);
+  margin-bottom:7px;
+}
+
+.games-frame-name{
+  font-size:22px;
+  line-height:1.16;
+  font-weight:760;
+  color:rgba(72,78,94,0.84);
+  letter-spacing:0.8px;
+  margin-bottom:8px;
+  text-shadow:0 1px 0 rgba(255,255,255,0.55);
+}
+
+.games-frame-desc{
+  font-size:12px;
+  line-height:1.65;
+  color:rgba(88,96,114,0.58);
+}
+
+.games-frame-tag-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:13px;
+}
+
+.games-frame-tag{
+  font-size:10px;
+  color:rgba(88,96,114,0.58);
+  border:1px solid rgba(255,255,255,0.60);
+  background:rgba(255,255,255,0.28);
+  border-radius:999px;
+  padding:4px 8px;
+  backdrop-filter:blur(18px) saturate(1.10);
+  -webkit-backdrop-filter:blur(18px) saturate(1.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.44);
+}
+
+/* 页码点 */
+.games-frame-dots{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:7px;
+  height:18px;
+  margin:-4px 0 13px;
+}
+
+.games-frame-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:rgba(106,116,132,0.20);
+  transition:all 0.25s ease;
+}
+
+.games-frame-dot.active{
+  width:22px;
+  border-radius:999px;
+  background:rgba(143,134,182,0.58);
+}
+
+/* 底部按钮区 */
+.games-frame-actions{
+  width:100%;
+  max-width:326px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.games-nav-btn{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.70);
+  background:rgba(255,255,255,0.36);
+  color:rgba(76,84,100,0.74);
+  font-size:15px;
+  cursor:pointer;
+  backdrop-filter:blur(28px) saturate(1.16);
+  -webkit-backdrop-filter:blur(28px) saturate(1.16);
+  box-shadow:
+    0 8px 22px rgba(118,120,150,0.11),
+    inset 0 1px 0 rgba(255,255,255,0.58),
+    inset 0 -1px 0 rgba(255,255,255,0.18);
+}
+
+.games-nav-btn:active{
+  transform:scale(0.95);
+  background:rgba(255,255,255,0.24);
+}
+
+.games-enter-btn{
+  flex:1;
+  height:42px;
+  border:1px solid rgba(255,255,255,0.70);
+  border-radius:14px;
+  background:rgba(255,255,255,0.36);
+  color:rgba(76,84,100,0.74);
+  font-size:14px;
+  font-weight:650;
+  letter-spacing:0.8px;
+  cursor:pointer;
+  backdrop-filter:blur(28px) saturate(1.16);
+  -webkit-backdrop-filter:blur(28px) saturate(1.16);
+  box-shadow:
+    0 8px 22px rgba(118,120,150,0.11),
+    inset 0 1px 0 rgba(255,255,255,0.58),
+    inset 0 -1px 0 rgba(255,255,255,0.18);
+}
+
+.games-enter-btn:active{
+  transform:scale(0.98);
+  background:rgba(255,255,255,0.24);
+}
+
+.games-enter-btn.disabled{
+  opacity:0.44;
+  pointer-events:none;
+}
+
+.games-frame-hint{
+  max-width:326px;
+  margin-top:11px;
+  font-size:11px;
+  color:rgba(84,90,106,0.40);
+  line-height:1.65;
+  text-align:center;
+}
+
+/* 小屏幕压缩 */
+@media(max-height:700px){
+  .games-content{
+    padding-top:12px;
+    padding-bottom:16px;
+  }
+
+  .games-note{
+    padding:10px 12px;
+    margin-bottom:4px;
+  }
+
+  .games-frame-stage{
+    min-height:330px;
+    margin-top:-6px;
+  }
+
+  .games-frame-card{
+    height:330px;
+    min-height:310px;
+  }
+
+  .games-frame-art{
+    width:106px;
+    height:106px;
+  }
+
+  .games-frame-name{
+    font-size:20px;
+  }
+
+  .games-frame-dots{
+    margin-top:-12px;
+  }
+}
+
+/* 绘言戏局顶栏适配冰晶白界面
+   · 不改顶栏高度/布局/按钮尺寸
+   · 只改颜色和玻璃质感 */
+#gamesApp .app-header{
+  background:rgba(255,255,255,0.42);
+  border-bottom:1px solid rgba(255,255,255,0.62);
+  backdrop-filter:blur(28px) saturate(1.16);
+  -webkit-backdrop-filter:blur(28px) saturate(1.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.55);
+}
+
+#gamesApp .app-header-info h1{
+  color:rgba(72,78,94,0.86);
+}
+
+#gamesApp .app-header-info p{
+  color:rgba(84,90,106,0.48);
+}
+
+#gamesApp .app-back-btn{
+  background:rgba(255,255,255,0.36);
+  border-color:rgba(255,255,255,0.68);
+  color:rgba(76,84,100,0.74);
+  backdrop-filter:blur(22px) saturate(1.12);
+  -webkit-backdrop-filter:blur(22px) saturate(1.12);
+}

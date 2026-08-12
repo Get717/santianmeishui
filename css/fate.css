@@ -1,0 +1,54 @@
+/* ===== cbyd21_Fate — 浮生逆笔样式 =====
+ * 浮生逆笔的所有专属样式
+ * HTML结构在主文件 index.html 里（搜索 fateApp）
+ * JS逻辑在 js/fate.js
+ * 依赖主文件的 CSS 变量（--bg-card, --accent 等）
+ */
+
+/* 故事气泡（AI叙事内容） */
+.fate-story-block{background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:16px 18px;margin-bottom:14px;font-size:14px;line-height:1.8;color:var(--text-primary);white-space:pre-wrap;word-break:break-word;animation:msgIn 0.3s ease;position:relative}
+.fate-story-block em{font-style:italic;color:var(--text-secondary)}
+.fate-story-block strong{font-weight:600}
+
+/* 系统提示气泡（场景描述、系统信息） */
+.fate-story-system{background:rgba(124,111,155,0.08);border:1px solid rgba(124,111,155,0.15);border-left:3px solid var(--accent);font-size:13px;color:var(--text-secondary)}
+
+/* 用户行动气泡 */
+.fate-story-user{background:var(--bg-tertiary);border-left:3px solid var(--text-muted);font-size:13px;color:var(--text-secondary);font-style:italic}
+
+/* 选项区域容器 */
+.fate-choice-area{padding:12px 0}
+.fate-choice-hint{font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:10px}
+
+/* 选项按钮（AI生成的2-4个干预选项） */
+.fate-choice-btn{display:block;width:100%;text-align:left;padding:12px 16px;margin-bottom:8px;border-radius:12px;border:1px solid var(--border);background:var(--bg-tertiary);color:var(--text-primary);font-size:13px;line-height:1.5;cursor:pointer;transition:all 0.15s}
+.fate-choice-btn:active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* 自定义输入行（不选预设选项时手写行动） */
+.fate-custom-row{display:flex;gap:8px;margin-top:4px}
+.fate-custom-input{flex:1;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);border-radius:22px;color:var(--text-primary);font-size:13px;outline:none;font-family:inherit}
+.fate-custom-input:focus{border-color:var(--accent-soft)}
+.fate-custom-send{width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* 时间线分支列表项（侧边栏里的每条时间线） */
+.fate-branch-item{padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:2px;transition:background 0.2s;display:flex;justify-content:space-between;align-items:center}
+.fate-branch-item:active{background:var(--bg-hover)}
+.fate-branch-item.active{background:var(--accent-glow)}
+.fate-branch-info{flex:1;min-width:0}
+.fate-branch-title{font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fate-branch-preview{font-size:11px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* AI生成中动画 */
+.fate-typing{display:none;margin-bottom:14px}
+.fate-typing.active{display:block}
+.fate-typing-inner{background:var(--bg-card);border:1px solid var(--border-soft);border-left:3px solid var(--accent);border-radius:14px;padding:16px;display:flex;align-items:center;gap:10px}
+
+/* 退出确认弹窗遮罩 */
+.fate-exit-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center}
+.fate-exit-overlay.active{display:flex}
+.fate-exit-box{background:var(--bg-card);border-radius:16px;padding:24px 20px;margin:0 32px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+
+/* 电脑端手机框内退出弹窗定位修正 */
+@media(min-width:768px){
+.cbyd21-phone-frame .fate-exit-overlay{position:absolute}
+}
